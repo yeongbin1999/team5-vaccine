@@ -29,8 +29,8 @@ INSERT INTO cart_item (cart_id, product_id, quantity) VALUES
 
 -- 주문(Order)
 INSERT INTO orders (id, user_id, total_price, shipping_address, status) VALUES
-(1, 2, 35000, '서울시 강남구', '결제완료'),  -- 유저1 주문 1
-(2, 3, 32000, '서울시 마포구', '결제대기'),  -- 유저2 주문 2
+(1, 2, 35000, '서울시 강남구', '배송준비중'),  -- 유저1 주문 1
+(2, 3, 32000, '서울시 마포구', '배송준비중'),  -- 유저2 주문 2
 (3, 2, 19000, '서울시 강남구', '배송중');    -- 유저1 주문 3
 
 -- 주문상품(Order_Item)
