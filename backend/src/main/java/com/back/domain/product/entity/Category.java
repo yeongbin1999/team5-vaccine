@@ -9,6 +9,7 @@ import java.util.List;
 @Entity
 @Table(name = "category")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -47,7 +48,4 @@ public class Category {
         category.parent = null;
     }
 
-    public void setParent(Category parent) {
-        this.parent = parent;
-    }
 }
