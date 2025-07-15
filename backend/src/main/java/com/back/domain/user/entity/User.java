@@ -19,22 +19,22 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;   // ✅ DB가 INT면 Integer가 더 일치
 
-    @Column(length = 15)
-    private String name;
+    @Column(length = 20)
+    private String name;  // ✅ 이름: 20자면 충분
 
-    @Column(length = 30, unique = true, nullable = false)
-    private String email;
+    @Column(length = 100, unique = true, nullable = false)
+    private String email; // ✅ 이메일: 최대 100자
 
-    @Column(length = 255, nullable = false)
-    private String password;
+    @Column(length = 100, nullable = false)
+    private String password; // ✅ BCrypt 해시 기준 60자, 여유 있게 100자
 
-    @Column(length = 255)
-    private String address;
+    @Column(length = 200)
+    private String address; // ✅ 도로명 + 상세주소 → 200자
 
-    @Column(length = 30)
-    private String phone;
+    @Column(length = 20)
+    private String phone;   // ✅ 국제번호 포함 → 20자면 충분
 
     @CreatedDate
     @Column(name = "join_date", updatable = false)
@@ -45,9 +45,10 @@ public class User {
     private LocalDateTime updateDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role;
+    @Column(nullable = false, length = 10)
+    private Role role;  // ✅ USER / ADMIN → 10자면 충분
 
+    // ===== 편의 메서드 =====
     public void updateProfile(String name, String address, String phone) {
         this.name = name;
         this.address = address;
