@@ -38,3 +38,4 @@ out/
 
 ### Custom ###
 db_dev.*
+.env

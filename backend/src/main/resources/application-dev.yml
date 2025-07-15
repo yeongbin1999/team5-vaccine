@@ -1,0 +1,6 @@
+Spring:
+  datasource:
+    url: jdbc:h2:./db_dev;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
