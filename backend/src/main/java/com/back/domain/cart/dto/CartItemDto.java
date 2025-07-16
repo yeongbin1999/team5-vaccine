@@ -4,7 +4,7 @@ import com.back.domain.cart.entity.CartItem;
 
 public record CartItemDto(
         Long id,
-        Long productId,
+        int productId,
         String productName,
         int quantity,
         int unitPrice
