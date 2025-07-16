@@ -1,5 +1,6 @@
 package com.back.domain.user.entity;
 
+import com.back.domain.cart.entity.Cart;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
