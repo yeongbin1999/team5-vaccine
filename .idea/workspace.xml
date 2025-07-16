@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9949b26d-642d-4a7a-9003-683b39f7459a" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/back/domain/cart/dto/CartItemDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/back/domain/cart/dto/CartItemDto.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/back/domain/cart/entity/CartItem.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/back/domain/cart/entity/CartItem.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/back/domain/cart/repository/CartItemRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/back/domain/cart/repository/CartItemRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/back/domain/cart/repository/CartRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/back/domain/cart/repository/CartRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,7 +90,7 @@
   "keyToString": {
     "Gradle.Download Sources.executor": "Run",
     "Gradle.backend [check].executor": "Run",
-    "Gradle.backend [test].executor": "Debug",
+    "Gradle.backend [test].executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
@@ -106,7 +103,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "File.Encoding",
+    "settings.editor.selected.configurable": "reference.settingsdialog.project.gradle",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -186,7 +183,7 @@
       <option name="presentableId" value="Default" />
       <updated>1752539087936</updated>
       <workItem from="1752539089082" duration="13927000" />
-      <workItem from="1752624451669" duration="11328000" />
+      <workItem from="1752624451669" duration="13903000" />
     </task>
     <servers />
   </component>
