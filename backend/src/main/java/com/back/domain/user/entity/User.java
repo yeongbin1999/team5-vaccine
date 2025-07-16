@@ -45,8 +45,7 @@ public class User {
     @Column(name = "update_date")
     private LocalDateTime updateDate;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cart_id", nullable = false, unique = true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Cart cart;
 
     @Enumerated(EnumType.STRING)
