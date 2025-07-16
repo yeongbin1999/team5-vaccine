@@ -1,5 +1,6 @@
 package com.back.domain.user.entity;
 
+import com.back.domain.cart.entity.Cart;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -43,6 +44,9 @@ public class User {
     @LastModifiedDate
     @Column(name = "update_date")
     private LocalDateTime updateDate;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Cart cart;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
