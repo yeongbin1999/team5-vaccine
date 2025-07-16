@@ -1,5 +1,6 @@
 package com.back.domain.cart.service;
 
+import com.back.domain.cart.dto.AddCartItemRequest;
 import com.back.domain.cart.dto.CartDto;
 import com.back.domain.cart.entity.Cart;
 import com.back.domain.cart.entity.CartItem;
@@ -26,11 +27,11 @@ public class CartService {
 
     // CartService는 CartItemRepository를 사용하여 장바구니 아이템을 관리합니다.
     // CartService는 CartItemRepository를 통해 장바구니 아이템을 추가, 수정, 삭제하는 기능을 제공합니다.
-    public void addItem(int userId, int productId, int quantity) {
+    public void addItem(int userId, AddCartItemRequest request) {
         // 장바구니 아이템 추가 로직
         // 1. 사용자와 상품을 조회합니다.
         User user = userRepository.findById(userId).orElseThrow();
-        Product product = productRepository.findById(productId).orElseThrow();
+        Product product = productRepository.findById(request.productId()).orElseThrow();
         // 2. 해당 사용자의 장바구니를 조회합니다.
         Cart cart = cartRepository.findByUser(user)
                 .orElseGet(() -> cartRepository.save(Cart.builder().user(user).build()));
@@ -40,12 +41,12 @@ public class CartService {
 
         if (optionalItem.isPresent()) {
             CartItem item = optionalItem.get();
-            item.updateQuantity(item.getQuantity() + quantity);
+            item.updateQuantity(item.getQuantity() + request.quantity());
         } else {
             CartItem item = CartItem.builder()
                     .cart(cart)
                     .product(product)
-                    .quantity(quantity)
+                    .quantity(request.quantity())
                     .build();
             cartItemRepository.save(item);
         }
