@@ -22,17 +22,18 @@ public class Product {
     @GeneratedValue(strategy = IDENTITY)
     private int id;
     private String name;
+
     @Column(name = "image_url")
     private String imageUrl;
     private int price;
     private int stock;
+
     @Column(length = 500)
     private String description;
     @CreatedDate
     private LocalDateTime createAt;
     @LastModifiedDate
     private LocalDateTime updateAt;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

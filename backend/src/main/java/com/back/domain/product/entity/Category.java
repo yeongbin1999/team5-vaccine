@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -22,7 +22,6 @@ public class Category {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private Category category;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.REMOVE)
     private List<Category> categories;
