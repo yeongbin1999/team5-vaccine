@@ -44,6 +44,10 @@ public class User {
     @Column(name = "update_date")
     private LocalDateTime updateDate;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cart_id", nullable = false, unique = true)
+    private Cart cart;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
     private Role role;
