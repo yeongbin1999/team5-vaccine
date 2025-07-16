@@ -17,12 +17,11 @@ import java.time.LocalDateTime;
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(length = 20)
+    @Column(length = 20, nullable = false)
     private String name;
 
     @Column(length = 100, unique = true, nullable = false)
@@ -50,7 +49,8 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 10)
-    private Role role;
+    @Builder.Default // 빌더 패턴 사용 시 기본값 설정
+    private Role role = Role.USER; // 기본값을 USER로 명시
 
     // ===== 편의 메서드 =====
     public void updateProfile(String name, String address, String phone) {

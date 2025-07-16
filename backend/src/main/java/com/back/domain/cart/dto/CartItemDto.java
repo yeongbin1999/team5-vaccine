@@ -3,7 +3,7 @@ package com.back.domain.cart.dto;
 import com.back.domain.cart.entity.CartItem;
 
 public record CartItemDto(
-        Long id,
+        Integer id,
         int productId,
         String productName,
         int quantity,
