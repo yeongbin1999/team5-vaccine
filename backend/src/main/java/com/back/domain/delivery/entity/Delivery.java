@@ -1,4 +1,4 @@
-package com.back.domain.delevery.entity;
+package com.back.domain.delivery.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
