@@ -1,6 +1,7 @@
 package com.back.domain.cart.service;
 
 import com.back.domain.cart.dto.AddCartItemRequest;
+
 import com.back.domain.cart.dto.CartDto;
 import com.back.domain.cart.entity.Cart;
 import com.back.domain.cart.entity.CartItem;
@@ -32,6 +33,7 @@ public class CartService {
         // 1. 사용자와 상품을 조회합니다.
         User user = userRepository.findById(userId).orElseThrow();
         Product product = productRepository.findById(request.productId()).orElseThrow();
+
         // 2. 해당 사용자의 장바구니를 조회합니다.
         Cart cart = cartRepository.findByUser(user)
                 .orElseGet(() -> cartRepository.save(Cart.builder().user(user).build()));
