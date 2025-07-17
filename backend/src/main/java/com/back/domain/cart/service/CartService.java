@@ -27,7 +27,7 @@ public class CartService {
 
     // CartService는 CartItemRepository를 사용하여 장바구니 아이템을 관리합니다.
     // CartService는 CartItemRepository를 통해 장바구니 아이템을 추가, 수정, 삭제하는 기능을 제공합니다.
-    public void addItem(int userId, AddCartItemRequest request) {
+    public void addItem(Integer userId, AddCartItemRequest request) {
         // 장바구니 아이템 추가 로직
         // 1. 사용자와 상품을 조회합니다.
         User user = userRepository.findById(userId).orElseThrow();
