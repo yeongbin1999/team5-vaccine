@@ -1,6 +1,6 @@
 package com.back.domain.order.entity;
 
-import com.back.domain.delevery.entity.Delivery;
+import com.back.domain.delivery.entity.Delivery;
 import com.back.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;

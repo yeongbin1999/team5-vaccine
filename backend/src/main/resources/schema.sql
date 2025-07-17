@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users
 (
     id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    name        VARCHAR(20),
+    name        VARCHAR(20) NOT NULL,
     email       VARCHAR(100) UNIQUE NOT NULL,
     password    VARCHAR(60) NOT NULL,
     address     VARCHAR(200),

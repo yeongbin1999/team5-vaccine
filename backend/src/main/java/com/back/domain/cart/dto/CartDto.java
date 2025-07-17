@@ -5,7 +5,7 @@ import com.back.domain.cart.entity.Cart;
 import java.util.List;
 
 public record CartDto(
-        Long cartId,
+        Integer cartId, // Long -> Integer 변경 제안
         int totalQuantity,
         int totalPrice,
         List<CartItemDto> items
@@ -15,9 +15,19 @@ public record CartDto(
                 .map(CartItemDto::new)
                 .toList();
 
-        int totalQuantity = itemDtos.stream().mapToInt(CartItemDto::quantity).sum();
-        int totalPrice = itemDtos.stream().mapToInt(item -> item.quantity() * item.unitPrice()).sum();
+        int totalQuantity = itemDtos.stream()
+                .mapToInt(CartItemDto::quantity)
+                .sum();
+        // CartItemDto에 unitPrice()가 있다고 가정합니다.
+        int totalPrice = itemDtos.stream()
+                .mapToInt(item -> item.quantity() * item.unitPrice())
+                .sum();
 
-        return new CartDto(cart.getId(), totalQuantity, totalPrice, itemDtos);
+        return new CartDto(
+                cart.getId(),
+                totalQuantity,
+                totalPrice,
+                itemDtos
+        );
     }
 }
