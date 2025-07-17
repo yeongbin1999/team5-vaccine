@@ -22,12 +22,13 @@
     <content url="file://$MODULE_DIR$/../../backend/build/generated/sources/annotationProcessor/java/main">
       <sourceFolder url="file://$MODULE_DIR$/../../backend/build/generated/sources/annotationProcessor/java/main" isTestSource="false" generated="true" />
       <sourceFolder url="file://$MODULE_DIR$/../../backend/build/generated/sources/annotationProcessor/java/main" isTestSource="false" generated="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../backend/build/generated/sources/annotationProcessor/java/main" isTestSource="false" generated="true" />
     </content>
     <content url="file://$MODULE_DIR$/../../backend/src/main">
       <sourceFolder url="file://$MODULE_DIR$/../../backend/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/../../backend/src/main/resources" type="java-resource" />
     </content>
-    <orderEntry type="jdk" jdkName="21" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.projectlombok:lombok:1.18.38" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-data-jpa:3.5.3" level="project" />
