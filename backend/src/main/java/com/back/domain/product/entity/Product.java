@@ -26,7 +26,6 @@ public class Product {
     @Column(length = 100, nullable = false)
     private String name;
 
-    @Column(name = "image_url", length = 500) // 명시적으로 컬럼 이름 지정
     private String imageUrl;
 
     @Column(nullable = false)
@@ -36,7 +35,7 @@ public class Product {
     private Integer stock;
 
     @Lob
-    @Column(name = "description_text") // description을 위한 고유한 컬럼 이름 명시
+    @Column(name = "description") // description을 위한 고유한 컬럼 이름 명시
     private String description;
 
     @CreatedDate
