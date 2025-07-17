@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
-@Table(name = "product") // 테이블 이름 명시
+@Table(name = "product")
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -26,7 +26,7 @@ public class Product {
     @Column(length = 100, nullable = false)
     private String name;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url", length = 500) // 명시적으로 컬럼 이름 지정
     private String imageUrl;
 
     @Column(nullable = false)
@@ -36,6 +36,7 @@ public class Product {
     private Integer stock;
 
     @Lob
+    @Column(name = "description_text") // description을 위한 고유한 컬럼 이름 명시
     private String description;
 
     @CreatedDate
@@ -47,6 +48,6 @@ public class Product {
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id") // category_id 컬럼 이름 지정
     private Category category;
 }
