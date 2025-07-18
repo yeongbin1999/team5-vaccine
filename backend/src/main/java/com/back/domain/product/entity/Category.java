@@ -32,8 +32,8 @@ public class Category {
     @Builder.Default
     private List<Category> children = new ArrayList<>(); // 초기화 (nullpointexception 방지)
 
-    // 현재 카테고리에 속한 상품 목록
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    // 현재 카테고리에 속한 상품 목록 (삭제 시 cascade 하지 않음)
+    @OneToMany(mappedBy = "category")
     @Builder.Default
     private List<Product> products = new ArrayList<>(); // 초기화 (nullpointexception 방지)
 

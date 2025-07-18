@@ -192,10 +192,10 @@ public class CategoryControllerTest {
     @Test
     @DisplayName("DELETE /api/v1/admin/categories/{categoryId} - 카테고리 삭제 실패 (연결된 상품 존재)")
     void deleteCategory_Conflict_ProductsExist() throws Exception {
-        // ID 2번 '커피빈' 카테고리는 상품(1,2,3,4)과 연결되어 있음
+        // ID 2번 '커피빈' 카테고리는 상품(1,2,3,4,5)과 연결되어 있음
         mockMvc.perform(delete("/api/v1/admin/categories/{categoryId}", 2))
                 .andDo(print())
-                .andExpect(status().is5xxServerError()); // 서버 에러 또는 제약 조건 위반으로 인한 에러
+                .andExpect(status().is5xxServerError()); // RuntimeException으로 인한 500 에러
     }
 
     @Test
