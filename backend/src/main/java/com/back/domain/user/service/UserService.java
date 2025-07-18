@@ -1,9 +1,12 @@
 package com.back.domain.user.service;
 
 import com.back.domain.user.dto.UserResponse;
+import com.back.domain.user.entity.User;
 import com.back.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,5 +24,9 @@ public class UserService {
                         user.getAddress()
                 ))
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }
