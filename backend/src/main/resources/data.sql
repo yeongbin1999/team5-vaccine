@@ -5,9 +5,12 @@ INSERT INTO users (id, name, email, password, address, phone, role) VALUES
 (3, '유저2', 'user2@test.com', 'abcd', '서울시 마포구', '010-5555-6666', 'USER');
 
 -- 카테고리(Category)
-INSERT INTO category (name, parent_id) VALUES
-('식품', NULL),
-('커피빈', 1);
+INSERT INTO category (id, name, parent_id) VALUES
+(1, '식품', NULL),
+(2, '커피빈', 1),
+(3, '음료', NULL),
+(4, '주스', 3),
+(5, '차', 1);
 
 -- 상품(Product)
 INSERT INTO product (id, name, image_url, price, stock, description, category_id) VALUES

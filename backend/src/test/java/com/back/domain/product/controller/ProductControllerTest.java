@@ -31,14 +31,14 @@ public class ProductControllerTest {
 
     @BeforeEach // 각 테스트 메서드 실행 전 초기화
     void setUp() {
-        // 테스트용 상품 생성 요청 DTO (categoryId 2는 data-test.sql에 '커피빈'으로 가정)
+        // 테스트용 상품 생성 요청 DTO (categoryId 2는 data.sql에 '커피빈'으로 가정)
         testProductRequestDto = new ProductRequestDto(
                 "테스트 새 상품",
                 "http://test.com/new_product.jpg",
                 25000,
                 100,
                 "테스트용 상품 설명입니다.",
-                2 // category_id (data-test.sql에 존재하는 ID)
+                2 // category_id (data.sql에 존재하는 ID)
         );
 
         // 유효성 검증 실패 테스트용 DTO (이름 누락)
@@ -62,13 +62,13 @@ public class ProductControllerTest {
                 .andExpect(status().isOk()) // HTTP 200 OK
                 .andExpect(jsonPath("$").isArray()) // 응답이 배열인지 확인
                 .andExpect(jsonPath("$[0].id").exists()) // 첫 번째 상품의 ID 존재 여부 확인
-                .andExpect(jsonPath("$[0].name").value("에티오피아 예가체프")); // data-test.sql 기준 첫 상품 이름 확인
+                .andExpect(jsonPath("$[0].name").value("에티오피아 예가체프")); // data.sql 기준 첫 상품 이름 확인
     }
 
     @Test
     @DisplayName("GET /api/v1/products/{productId} - 상품 상세 조회 성공")
     void getProductById_Success() throws Exception {
-        // data-test.sql에 ID가 1인 상품이 존재한다고 가정
+        // data.sql에 ID가 1인 상품이 존재한다고 가정
         mockMvc.perform(get("/api/v1/products/{productId}", 1))
                 .andDo(print())
                 .andExpect(status().isOk()) // HTTP 200 OK
@@ -129,7 +129,7 @@ public class ProductControllerTest {
     @Test
     @DisplayName("PUT /api/v1/admin/products/{productId} - 상품 수정 성공")
     void updateProduct_Success() throws Exception {
-        // data-test.sql에 ID가 1인 상품을 수정
+        // data.sql에 ID가 1인 상품을 수정
         ProductRequestDto updateDto = new ProductRequestDto(
                 "수정된 예가체프 상품",
                 "http://updated.com/image.jpg",
@@ -174,7 +174,7 @@ public class ProductControllerTest {
     @Test
     @DisplayName("DELETE /api/v1/admin/products/{productId} - 상품 삭제 성공")
     void deleteProduct_Success() throws Exception {
-        // data-test.sql에 ID가 3인 상품을 삭제 (브라질 산토스)
+        // data.sql에 ID가 3인 상품을 삭제 (브라질 산토스)
         mockMvc.perform(delete("/api/v1/admin/products/{productId}", 3))
                 .andDo(print())
                 .andExpect(status().isNoContent()); // HTTP 204 No Content

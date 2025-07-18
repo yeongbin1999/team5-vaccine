@@ -36,7 +36,7 @@ public class CategoryControllerTest {
     void setUp() {
         // 최상위 카테고리 생성용 DTO (parentId = null)
         testCategoryRequestDto = new CategoryRequestDto("새로운 최상위 카테고리", null);
-        // 하위 카테고리 생성용 DTO (parentId 1은 data-test.sql에 '식품'으로 가정)
+        // 하위 카테고리 생성용 DTO (parentId 1은 data.sql에 '식품'으로 가정)
         testSubCategoryRequestDto = new CategoryRequestDto("새로운 하위 카테고리", 1);
         // 유효성 검증 실패 테스트용 DTO (이름 누락)
         invalidCategoryRequestDto = new CategoryRequestDto("", null);
@@ -62,7 +62,7 @@ public class CategoryControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(5)) // data-test.sql에 5개 카테고리 삽입 가정
+                .andExpect(jsonPath("$.length()").value(5)) // data.sql에 5개 카테고리 있음
                 .andExpect(jsonPath("$[0].name").value("식품"))
                 .andExpect(jsonPath("$[1].name").value("커피빈"));
     }
@@ -176,7 +176,7 @@ public class CategoryControllerTest {
     @Test
     @DisplayName("DELETE /api/v1/admin/categories/{categoryId} - 카테고리 삭제 성공 (하위 카테고리 없음)")
     void deleteCategory_Success() throws Exception {
-        // data-test.sql에 있는 4번 주스 카테고리 삭제 (하위 카테고리 없는 경우)
+        // data.sql에 있는 4번 주스 카테고리 삭제 (하위 카테고리 없는 경우)
         mockMvc.perform(delete("/api/v1/admin/categories/{categoryId}", 4))
                 .andDo(print())
                 .andExpect(status().isNoContent());
