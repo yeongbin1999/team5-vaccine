@@ -10,6 +10,7 @@ import com.back.domain.product.entity.Product;
 import com.back.domain.product.repository.ProductRepository;
 import com.back.domain.user.entity.User;
 import com.back.domain.user.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,7 @@ public class CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final EntityManager entityManager; // EntityManager 주입
 
     // CartService는 CartItemRepository를 사용하여 장바구니 아이템을 관리합니다.
     // CartService는 CartItemRepository를 통해 장바구니 아이템을 추가, 수정, 삭제하는 기능을 제공합니다.
@@ -69,6 +71,7 @@ public class CartService {
     // CartService는 CartItemRepository를 통해 장바구니 아이템을 삭제하는 기능을 제공합니다.
     public void deleteItem(Integer CartItemId) {
         cartItemRepository.deleteById(CartItemId);
+
     }
 
     // CartService는 CartRepository를 통해 장바구니를 비우는 기능을 제공합니다.
