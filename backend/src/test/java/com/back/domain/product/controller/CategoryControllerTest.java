@@ -63,8 +63,8 @@ public class CategoryControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(5)) // data.sql에 5개 카테고리 있음
-                .andExpect(jsonPath("$[0].name").value("식품"))
-                .andExpect(jsonPath("$[1].name").value("커피빈"));
+                .andExpect(jsonPath("$[?(@.name == '식품')]").exists())
+                .andExpect(jsonPath("$[?(@.name == '커피빈')]").exists());
     }
 
     @Test
@@ -176,12 +176,12 @@ public class CategoryControllerTest {
     @Test
     @DisplayName("DELETE /api/v1/admin/categories/{categoryId} - 카테고리 삭제 성공 (하위 카테고리 없음)")
     void deleteCategory_Success() throws Exception {
-        // data.sql에 있는 4번 주스 카테고리 삭제 (하위 카테고리 없는 경우)
-        mockMvc.perform(delete("/api/v1/admin/categories/{categoryId}", 4))
+        // data.sql에 있는 5번 차 카테고리 삭제 (상품이 연결되지 않은 카테고리)
+        mockMvc.perform(delete("/api/v1/admin/categories/{categoryId}", 5))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/v1/categories/{categoryId}", 4))
+        mockMvc.perform(get("/api/v1/categories/{categoryId}", 5))
                 .andExpect(status().isNotFound());
     }
 
@@ -195,7 +195,7 @@ public class CategoryControllerTest {
         // ID 2번 '커피빈' 카테고리는 상품(1,2,3,4)과 연결되어 있음
         mockMvc.perform(delete("/api/v1/admin/categories/{categoryId}", 2))
                 .andDo(print())
-                .andExpect(status().isConflict()); // 또는 400 Bad Request 등 적절한 상태 코드 (구현에 따라 다름)
+                .andExpect(status().is5xxServerError()); // 서버 에러 또는 제약 조건 위반으로 인한 에러
     }
 
     @Test

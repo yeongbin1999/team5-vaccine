@@ -17,7 +17,8 @@ INSERT INTO product (id, name, image_url, price, stock, description, category_id
 (1, '에티오피아 예가체프', 'https://dummyimg.com/ethiopia.jpg', 18000, 50, '플로럴하고 밝은 산미의 예가체프 원두', 2),
 (2, '콜롬비아 수프리모', 'https://dummyimg.com/colombia.jpg', 17000, 60, '부드럽고 밸런스 좋은 콜롬비아 수프리모 원두', 2),
 (3, '브라질 산토스', 'https://dummyimg.com/brazil.jpg', 16000, 80, '견과류 향이 풍부한 브라질 산토스 원두', 2),
-(4, '케냐 AA', 'https://dummyimg.com/kenya.jpg', 19000, 40, '진한 바디감과 과일향의 케냐 AA 원두', 2);
+(4, '케냐 AA', 'https://dummyimg.com/kenya.jpg', 19000, 40, '진한 바디감과 과일향의 케냐 AA 원두', 2),
+(5, '과테말라 안티구아', 'https://dummyimg.com/guatemala.jpg', 21000, 30, '스모키하고 풍부한 맛의 과테말라 안티구아 원두', 2);
 
 -- 장바구니(Cart)
 INSERT INTO cart (id, user_id) VALUES

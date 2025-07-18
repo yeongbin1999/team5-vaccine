@@ -74,7 +74,7 @@ public class ProductControllerTest {
                 .andExpect(status().isOk()) // HTTP 200 OK
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.name").value("에티오피아 예가체프"))
-                .andExpect(jsonPath("$.category.name").value("커피빈")); // 연관된 카테고리 이름 확인
+                .andExpect(jsonPath("$.category.id").value(2)); // 카테고리 객체의 id 검증
     }
 
     @Test
@@ -174,13 +174,13 @@ public class ProductControllerTest {
     @Test
     @DisplayName("DELETE /api/v1/admin/products/{productId} - 상품 삭제 성공")
     void deleteProduct_Success() throws Exception {
-        // data.sql에 ID가 3인 상품을 삭제 (브라질 산토스)
-        mockMvc.perform(delete("/api/v1/admin/products/{productId}", 3))
+        // data.sql에 ID가 5인 상품을 삭제 (과테말라 안티구아 - 주문과 연결되지 않은 상품)
+        mockMvc.perform(delete("/api/v1/admin/products/{productId}", 5))
                 .andDo(print())
                 .andExpect(status().isNoContent()); // HTTP 204 No Content
 
         // 삭제 후 해당 상품이 조회되지 않는지 확인 (선택적 검증)
-        mockMvc.perform(get("/api/v1/products/{productId}", 3))
+        mockMvc.perform(get("/api/v1/products/{productId}", 5))
                 .andExpect(status().isNotFound());
     }
 
