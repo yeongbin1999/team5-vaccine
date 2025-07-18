@@ -4,6 +4,8 @@ import com.back.domain.product.dto.category.CategoryRequestDto;
 import com.back.domain.product.dto.category.CategoryResponseDto;
 import com.back.domain.product.entity.Category;
 import com.back.domain.product.exception.CategoryNotFoundException;
+import com.back.domain.product.exception.CategoryHasProductsException;
+import com.back.domain.product.exception.CategoryHasChildrenException;
 import com.back.domain.product.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -80,9 +82,19 @@ public class CategoryService {
     // 카테고리 삭제 메서드
     @Transactional
     public void deleteCategory(Integer id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new CategoryNotFoundException("Category not found with ID: " + id);
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException("Category not found with ID: " + id));
+        
+        // 연관된 상품이 있는지 확인
+        if (!category.getProducts().isEmpty()) {
+            throw new CategoryHasProductsException("Cannot delete category because it has associated products");
         }
+        
+        // 하위 카테고리가 있는지 확인
+        if (!category.getChildren().isEmpty()) {
+            throw new CategoryHasChildrenException("Cannot delete category because it has child categories");
+        }
+        
         categoryRepository.deleteById(id);
     }
 }
