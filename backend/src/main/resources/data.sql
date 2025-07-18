@@ -5,16 +5,20 @@ INSERT INTO users (id, name, email, password, address, phone, role) VALUES
 (3, '유저2', 'user2@test.com', 'abcd', '서울시 마포구', '010-5555-6666', 'USER');
 
 -- 카테고리(Category)
-INSERT INTO category (name, parent_id) VALUES
-('식품', NULL),
-('커피빈', 1);
+INSERT INTO category (id, name, parent_id) VALUES
+(1, '식품', NULL),
+(2, '커피빈', 1),
+(3, '음료', NULL),
+(4, '주스', 3),
+(5, '차', 1);
 
 -- 상품(Product)
 INSERT INTO product (id, name, image_url, price, stock, description, category_id) VALUES
 (1, '에티오피아 예가체프', 'https://dummyimg.com/ethiopia.jpg', 18000, 50, '플로럴하고 밝은 산미의 예가체프 원두', 2),
 (2, '콜롬비아 수프리모', 'https://dummyimg.com/colombia.jpg', 17000, 60, '부드럽고 밸런스 좋은 콜롬비아 수프리모 원두', 2),
 (3, '브라질 산토스', 'https://dummyimg.com/brazil.jpg', 16000, 80, '견과류 향이 풍부한 브라질 산토스 원두', 2),
-(4, '케냐 AA', 'https://dummyimg.com/kenya.jpg', 19000, 40, '진한 바디감과 과일향의 케냐 AA 원두', 2);
+(4, '케냐 AA', 'https://dummyimg.com/kenya.jpg', 19000, 40, '진한 바디감과 과일향의 케냐 AA 원두', 2),
+(5, '과테말라 안티구아', 'https://dummyimg.com/guatemala.jpg', 21000, 30, '스모키하고 풍부한 맛의 과테말라 안티구아 원두', 2);
 
 -- 장바구니(Cart)
 INSERT INTO cart (id, user_id) VALUES
