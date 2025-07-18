@@ -71,6 +71,8 @@ public class CartService {
     // CartService는 CartItemRepository를 통해 장바구니 아이템을 삭제하는 기능을 제공합니다.
     public void deleteItem(Integer CartItemId) {
         cartItemRepository.deleteById(CartItemId);
+        entityManager.flush(); // DB에 변경사항 즉시 반영
+        entityManager.clear(); // 영속성 컨텍스트 캐시를 비워 다음 조회 시 강제로 DB에서 불러오게 함
 
     }
 
