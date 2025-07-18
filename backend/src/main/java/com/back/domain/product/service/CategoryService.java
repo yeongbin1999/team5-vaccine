@@ -4,6 +4,8 @@ import com.back.domain.product.dto.category.CategoryRequestDto;
 import com.back.domain.product.dto.category.CategoryResponseDto;
 import com.back.domain.product.entity.Category;
 import com.back.domain.product.exception.CategoryNotFoundException;
+import com.back.domain.product.exception.CategoryHasProductsException;
+import com.back.domain.product.exception.CategoryHasChildrenException;
 import com.back.domain.product.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -85,12 +87,12 @@ public class CategoryService {
         
         // 연관된 상품이 있는지 확인
         if (!category.getProducts().isEmpty()) {
-            throw new RuntimeException("Cannot delete category because it has associated products");
+            throw new CategoryHasProductsException("Cannot delete category because it has associated products");
         }
         
         // 하위 카테고리가 있는지 확인
         if (!category.getChildren().isEmpty()) {
-            throw new RuntimeException("Cannot delete category because it has child categories");
+            throw new CategoryHasChildrenException("Cannot delete category because it has child categories");
         }
         
         categoryRepository.deleteById(id);
