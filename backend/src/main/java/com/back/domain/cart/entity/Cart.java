@@ -26,7 +26,16 @@ public class Cart {
     @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
 
-    public void clearItems() {
-        cartItems.clear();
+    public void addCartItem(CartItem cartItem) {
+        this.cartItems.add(cartItem);
+        cartItem.setCart(this);
+    }
+
+    public void removeCartItem(CartItem cartItem) {
+        this.cartItems.remove(cartItem);
+    }
+
+    public void clearCartItems() {
+        this.cartItems.clear();
     }
 }
