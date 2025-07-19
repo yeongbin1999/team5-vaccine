@@ -16,11 +16,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
-import java.util.NoSuchElementException;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,7 +42,7 @@ class CartControllerTest {
      * @throws Exception MockMvc perform 실패 시 예외
      */
     private Integer getCartItemIdByProductId(Integer userId, Integer productId) throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/cart")
+        MvcResult result = mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -64,7 +62,7 @@ class CartControllerTest {
     @DisplayName("장바구니 조회 - 성공적인 조회 및 초기 데이터 검증")
     void getCart_Success() throws Exception {
         Integer userId = 2;
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -81,7 +79,7 @@ class CartControllerTest {
     void getCart_UserWithoutCart_CreatesNewCart() throws Exception {
         Integer userId = 5;
 
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk()) // 장바구니 생성 후 200 OK 반환
                 .andDo(print())
@@ -96,7 +94,7 @@ class CartControllerTest {
     void getCart_NonExistentUser() throws Exception {
         Integer nonExistentUserId = 999;
 
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(nonExistentUserId)))
                 .andExpect(status().isNotFound()) // NoSuchElementException -> 404 Not Found
                 .andDo(print())
@@ -113,14 +111,14 @@ class CartControllerTest {
 
         AddCartItemRequest request = new AddCartItemRequest(productIdToAdd, quantityToAdd);
 
-        mockMvc.perform(post("/api/cart/items")
+        mockMvc.perform(post("/api/v1/carts/items")
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -138,7 +136,7 @@ class CartControllerTest {
 
         AddCartItemRequest request = new AddCartItemRequest(productIdToUpdate, quantityToAdd);
 
-        mockMvc.perform(post("/api/cart/items")
+        mockMvc.perform(post("/api/v1/carts/items")
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -146,7 +144,7 @@ class CartControllerTest {
                 .andDo(print());
 
         Integer updatedCartItemId = getCartItemIdByProductId(userId, productIdToUpdate);
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -162,7 +160,7 @@ class CartControllerTest {
         Integer nonExistentProductId = 999;
         AddCartItemRequest request = new AddCartItemRequest(nonExistentProductId, 1);
 
-        mockMvc.perform(post("/api/cart/items")
+        mockMvc.perform(post("/api/v1/carts/items")
                         .param("userId", String.valueOf(userId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -181,13 +179,13 @@ class CartControllerTest {
 
         UpdateCartItemRequest request = new UpdateCartItemRequest(5);
 
-        mockMvc.perform(put("/api/cart/items/{cartItemId}", cartItemIdToUpdate)
+        mockMvc.perform(put("/api/v1/carts/items/{cartItemId}", cartItemIdToUpdate)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -202,7 +200,7 @@ class CartControllerTest {
         Integer nonExistentCartItemId = 999;
         UpdateCartItemRequest request = new UpdateCartItemRequest(5);
 
-        mockMvc.perform(put("/api/cart/items/{cartItemId}", nonExistentCartItemId)
+        mockMvc.perform(put("/api/v1/carts/items/{cartItemId}", nonExistentCartItemId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound()) // NoSuchElementException -> 404 Not Found
@@ -219,7 +217,7 @@ class CartControllerTest {
 
         UpdateCartItemRequest request = new UpdateCartItemRequest(0);
 
-        mockMvc.perform(put("/api/cart/items/{cartItemId}", cartItemIdToUpdate)
+        mockMvc.perform(put("/api/v1/carts/items/{cartItemId}", cartItemIdToUpdate)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk()) // 예상: 200 OK (수량이 0으로 업데이트되거나 삭제됨)
@@ -227,7 +225,7 @@ class CartControllerTest {
 
         // 수량 0으로 업데이트 시 해당 항목이 삭제되므로, 해당 항목이 존재하지 않는지 검증합니다.
         // 그리고 장바구니의 총 수량과 총 가격이 올바르게 갱신되었는지 확인합니다.
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -245,7 +243,7 @@ class CartControllerTest {
 
         UpdateCartItemRequest request = new UpdateCartItemRequest(-1);
 
-        mockMvc.perform(put("/api/cart/items/{cartItemId}", cartItemIdToUpdate)
+        mockMvc.perform(put("/api/v1/carts/items/{cartItemId}", cartItemIdToUpdate)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest()) // DTO @Min 유효성 검사 (Spring 기본 처리)
@@ -260,11 +258,11 @@ class CartControllerTest {
         Integer productIdToDelete = 2;
         Integer cartItemIdToDelete = getCartItemIdByProductId(userId, productIdToDelete);
 
-        mockMvc.perform(delete("/api/cart/items/{cartItemId}", cartItemIdToDelete))
+        mockMvc.perform(delete("/api/v1/carts/items/{cartItemId}", cartItemIdToDelete))
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -281,11 +279,11 @@ class CartControllerTest {
         Integer productIdToDelete = 3;
         Integer cartItemIdToDelete = getCartItemIdByProductId(userId, productIdToDelete);
 
-        mockMvc.perform(delete("/api/cart/items/{cartItemId}", cartItemIdToDelete))
+        mockMvc.perform(delete("/api/v1/carts/items/{cartItemId}", cartItemIdToDelete))
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -299,7 +297,7 @@ class CartControllerTest {
     void deleteItem_NonExistentCartItem() throws Exception {
         Integer nonExistentCartItemId = 999;
 
-        mockMvc.perform(delete("/api/cart/items/{cartItemId}", nonExistentCartItemId))
+        mockMvc.perform(delete("/api/v1/carts/items/{cartItemId}", nonExistentCartItemId))
                 .andExpect(status().isNotFound()) // NoSuchElementException -> 404 Not Found
                 .andDo(print())
                 .andExpect(jsonPath("$.message").value("장바구니 항목을 찾을 수 없습니다. ID: " + nonExistentCartItemId));
@@ -310,7 +308,7 @@ class CartControllerTest {
     void deleteItem_InvalidIdFormatNegative() throws Exception {
         Integer invalidCartItemId = -1;
 
-        mockMvc.perform(delete("/api/cart/items/{cartItemId}", invalidCartItemId))
+        mockMvc.perform(delete("/api/v1/carts/items/{cartItemId}", invalidCartItemId))
                 .andExpect(status().isBadRequest()) // @Positive 유효성 검사 (Spring 기본 처리)
                 .andDo(print());
     }
@@ -320,7 +318,7 @@ class CartControllerTest {
     void deleteItem_InvalidIdFormatZero() throws Exception {
         Integer invalidCartItemId = 0;
 
-        mockMvc.perform(delete("/api/cart/items/{cartItemId}", invalidCartItemId))
+        mockMvc.perform(delete("/api/v1/carts/items/{cartItemId}", invalidCartItemId))
                 .andExpect(status().isBadRequest()) // @Positive 유효성 검사 (Spring 기본 처리)
                 .andDo(print());
     }
@@ -331,7 +329,7 @@ class CartControllerTest {
     void getCart_AnotherUserCartAccessAttempt() throws Exception {
         Integer targetUserId = 3;
 
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(targetUserId)))
                 .andExpect(status().isOk())
                 .andDo(print());
@@ -346,7 +344,7 @@ class CartControllerTest {
 
         UpdateCartItemRequest request = new UpdateCartItemRequest(10);
 
-        mockMvc.perform(put("/api/cart/items/{cartItemId}", anotherUserCartItemId)
+        mockMvc.perform(put("/api/v1/carts/items/{cartItemId}", anotherUserCartItemId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -358,12 +356,12 @@ class CartControllerTest {
     void clearCart_AnotherUserCartAttempt() throws Exception {
         Integer targetUserId = 3;
 
-        mockMvc.perform(delete("/api/cart")
+        mockMvc.perform(delete("/api/v1/carts")
                         .param("userId", String.valueOf(targetUserId)))
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(targetUserId)))
                 .andExpect(jsonPath("$.totalQuantity").value(0));
     }
@@ -374,12 +372,12 @@ class CartControllerTest {
     void clearCart_Success() throws Exception {
         Integer userId = 2;
 
-        mockMvc.perform(delete("/api/cart")
+        mockMvc.perform(delete("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andDo(print());
 
-        mockMvc.perform(get("/api/cart")
+        mockMvc.perform(get("/api/v1/carts")
                         .param("userId", String.valueOf(userId)))
                 .andExpect(status().isOk())
                 .andDo(print())
