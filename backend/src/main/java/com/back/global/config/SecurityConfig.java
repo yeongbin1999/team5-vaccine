@@ -27,7 +27,6 @@ public class SecurityConfig {
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -64,11 +63,11 @@ public class SecurityConfig {
         return source;
     }
 
-
 //    @Bean
 //    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //        return http
 //                .csrf(csrf -> csrf.disable()) // JWT 토큰 방식이므로 CSRF 비활성화
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 추가
 //                .headers(headers -> headers
 //                        .contentSecurityPolicy(csp -> csp
 //                                .policyDirectives("frame-ancestors 'self'")
