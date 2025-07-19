@@ -40,8 +40,12 @@ logging:
     org.springframework.transaction.interceptor: TRACE
 
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION}
+  secret: ${JWT_SECRET:3f1e2a0e-8e8f-4c0a-9d3f-b3fae09e6d5a}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:PT15M}
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:PT168H}
+
+cookie:
+  secure: false
 
 server:
   port: 8080

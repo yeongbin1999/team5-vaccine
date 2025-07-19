@@ -1,9 +1,10 @@
-package com.back.domain.cart;
+package com.back.domain.admin;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = "com.back.domain.cart")
-public class CartDomainConfig {
+@ComponentScan(basePackages = "com.back.domain.admin")
+public class AdminDomainConfig {
+
 }

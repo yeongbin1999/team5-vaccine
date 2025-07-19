@@ -36,6 +36,11 @@ jobs:
     name: Backend Build & Test
     runs-on: ubuntu-latest
     needs: frontend
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
     steps:
       - uses: actions/checkout@v3
       
@@ -51,4 +56,7 @@ jobs:
 
       - name: Build and test backend
         working-directory: ./backend
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
         run: ./gradlew clean build

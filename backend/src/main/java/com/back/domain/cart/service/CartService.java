@@ -2,6 +2,7 @@ package com.back.domain.cart.service;
 
 import com.back.domain.cart.dto.AddCartItemRequest;
 import com.back.domain.cart.dto.CartDto;
+import com.back.domain.cart.dto.UpdateCartItemRequest;
 import com.back.domain.cart.entity.Cart;
 import com.back.domain.cart.entity.CartItem;
 import com.back.domain.cart.repository.CartItemRepository;
@@ -10,38 +11,46 @@ import com.back.domain.product.entity.Product;
 import com.back.domain.product.repository.ProductRepository;
 import com.back.domain.user.entity.User;
 import com.back.domain.user.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.NoSuchElementException; // NoSuchElementException 임포트
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
-    // CartService는 CartItemRepository를 사용하여 장바구니 아이템을 관리합니다.
-    // CartService는 CartItemRepository를 통해 장바구니 아이템을 추가, 수정, 삭제하는 기능을 제공합니다.
+    @Transactional
     public void addItem(Integer userId, AddCartItemRequest request) {
-        // 장바구니 아이템 추가 로직
-        // 1. 사용자와 상품을 조회합니다.
-        User user = userRepository.findById(userId).orElseThrow();
-        Product product = productRepository.findById(request.productId()).orElseThrow();
-        // 2. 해당 사용자의 장바구니를 조회합니다.
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. userId: " + userId));
+        Product product = productRepository.findById(request.productId())
+                .orElseThrow(() -> new NoSuchElementException("상품을 찾을 수 없습니다. productId: " + request.productId()));
+
         Cart cart = cartRepository.findByUser(user)
                 .orElseGet(() -> cartRepository.save(Cart.builder().user(user).build()));
-        // 3. 장바구니에 해당 상품이 이미 존재하는지 확인합니다.
-        // 4. 존재하면 수량을 업데이트하고, 존재하지 않으면 새로 추가합니다.
+
+        if (product.getStock() < request.quantity()) {
+            throw new IllegalArgumentException("상품의 재고가 부족합니다. 현재 재고: " + product.getStock());
+        }
+
         Optional<CartItem> optionalItem = cartItemRepository.findByCartAndProduct(cart, product);
 
         if (optionalItem.isPresent()) {
             CartItem item = optionalItem.get();
-            item.updateQuantity(item.getQuantity() + request.quantity());
+            int newTotalQuantity = item.getQuantity() + request.quantity();
+            if (product.getStock() < newTotalQuantity) {
+                throw new IllegalArgumentException("상품의 재고가 부족하여 더 이상 추가할 수 없습니다. 현재 재고: " + product.getStock());
+            }
+            item.updateQuantity(newTotalQuantity);
         } else {
             CartItem item = CartItem.builder()
                     .cart(cart)
@@ -49,32 +58,60 @@ public class CartService {
                     .quantity(request.quantity())
                     .build();
             cartItemRepository.save(item);
+            cart.addCartItem(item);
         }
     }
-    // CartService는 CartItemRepository를 통해 장바구니 아이템을 조회하는 기능을 제공합니다.
+
+    @Transactional(readOnly = true)
     public CartDto getCart(Integer userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow();
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. userId: " + userId));
+
         Cart cart = cartRepository.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("장바구니가 존재하지 않습니다."));
+                .orElseGet(() -> cartRepository.save(Cart.builder().user(user).build()));
+
         return CartDto.from(cart);
     }
-    // CartService는 CartItemRepository를 통해 장바구니 아이템의 수량을 업데이트하는 기능을 제공합니다.
-    public void updateItemQuantity(Integer CartItemId,int quantity) {
-        CartItem cartItem = cartItemRepository.findById(CartItemId)
-                .orElseThrow(() -> new RuntimeException("장바구니 아이템이 존재하지 않습니다."));
-        cartItem.updateQuantity(quantity);
+
+    @Transactional
+    public void updateItemQuantity(Integer cartItemId, UpdateCartItemRequest request) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new NoSuchElementException("장바구니 항목을 찾을 수 없습니다. cartItemId: " + cartItemId));
+
+        Product product = cartItem.getProduct();
+        Integer newQuantity = request.quantity();
+
+        if (newQuantity == 0) {
+            deleteItem(cartItemId);
+            return;
+        }
+
+        if (product.getStock() < newQuantity) {
+            throw new IllegalArgumentException("요청한 수량이 상품 재고를 초과합니다. 현재 재고: " + product.getStock());
+        }
+
+        cartItem.updateQuantity(newQuantity);
     }
 
-    // CartService는 CartItemRepository를 통해 장바구니 아이템을 삭제하는 기능을 제공합니다.
-    public void deleteItem(Integer CartItemId) {
-        cartItemRepository.deleteById(CartItemId);
+    @Transactional
+    public void deleteItem(Integer cartItemId) {
+        CartItem itemToDelete = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new NoSuchElementException("장바구니 항목을 찾을 수 없습니다. ID: " + cartItemId));
+
+        Cart cart = itemToDelete.getCart();
+        cart.removeCartItem(itemToDelete);
+        cartItemRepository.delete(itemToDelete);
     }
 
-    // CartService는 CartRepository를 통해 장바구니를 비우는 기능을 제공합니다.
+    @Transactional
     public void clearCart(Integer userId) {
-        Cart cart = cartRepository.findByUser(userRepository.findById(userId).orElseThrow())
-                .orElseThrow();
-        cart.clearItems();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("사용자를 찾을 수 없습니다. userId: " + userId));
+
+        Cart cart = cartRepository.findByUser(user)
+                .orElseThrow(() -> new NoSuchElementException("해당 사용자의 장바구니를 찾을 수 없습니다. userId: " + userId));
+
+        cartItemRepository.deleteAll(cart.getCartItems());
+        cart.clearCartItems();
     }
 }

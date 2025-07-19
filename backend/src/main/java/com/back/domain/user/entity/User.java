@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -65,5 +66,9 @@ public class User {
 
     public boolean isAdmin() {
         return this.role == Role.ADMIN;
+    }
+
+    public void updatePassword(String encodedNewPassword) {
+        this.password = encodedNewPassword;
     }
 }
