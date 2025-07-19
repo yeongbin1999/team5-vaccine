@@ -117,7 +117,7 @@ public class AuthService {
                 .maxAge(0)  // 즉시 만료
                 .build();
     }
-
+  
     //  비밀번호 검증 정책
     private void validatePasswordPolicy(String password) {
         if (password.length() < 8) {
