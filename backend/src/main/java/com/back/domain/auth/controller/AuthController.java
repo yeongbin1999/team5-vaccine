@@ -1,14 +1,17 @@
 package com.back.domain.auth.controller;
 
+import com.back.domain.auth.dto.ChangePasswordRequest;
 import com.back.domain.auth.dto.LoginRequest;
 import com.back.domain.auth.dto.SignupRequest;
 import com.back.domain.auth.service.AuthService;
+import com.back.global.security.auth.CustomUserDetails;
 import com.back.global.security.jwt.JwtTokens;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +48,20 @@ public class AuthController {
         ResponseCookie deleteCookie = authService.createLogoutCookie();
         response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(
+            @RequestBody ChangePasswordRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        authService.changePassword(
+                userDetails.getId(),
+                request.currentPassword(),
+                request.newPassword()
+        );
+
+        return ResponseEntity.ok("비밀번호가 변경되었습니다. 다시 로그인 해주세요.");
     }
 
     @PostMapping("/reissue")
