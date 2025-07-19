@@ -30,4 +30,9 @@ public class OrderItem {
 
     @Column(name = "unit_price", nullable = false)
     private int unitPrice;
+
+    public int getTotalPrice() {
+        return this.unitPrice * this.quantity;
+    }
+
 }

@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -34,9 +36,22 @@ public class Order {
     private String shippingAddress;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus status = OrderStatus.결제대기;
+    private OrderStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "delivery_id")
     private Delivery delivery;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderItem> items = new ArrayList<>();
+
+    @PrePersist
+    public void prePersist() {
+        if (status == null) {
+            status = OrderStatus.결제대기;
+        }
+        if (orderDate == null) {
+            orderDate = LocalDateTime.now();
+        }
+    }
 }
