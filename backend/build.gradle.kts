@@ -55,7 +55,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
-    implementation("org.springframework.boot:spring-boot-starter-security")
 }
 
 tasks.withType<Test> {
