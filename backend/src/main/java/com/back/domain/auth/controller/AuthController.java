@@ -64,7 +64,6 @@ public class AuthController {
         return ResponseEntity.ok("비밀번호가 변경되었습니다. 다시 로그인 해주세요.");
     }
 
-
     @PostMapping("/reissue")
     @Transactional(readOnly = true)
     public ResponseEntity<Void> reissue(@CookieValue(value = "refreshToken", required = false) String refreshToken,
