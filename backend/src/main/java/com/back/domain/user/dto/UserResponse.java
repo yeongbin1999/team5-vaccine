@@ -1,5 +1,6 @@
 package com.back.domain.user.dto;
 
+import com.back.domain.user.entity.Role;
 import com.back.domain.user.entity.User;
 
 public record UserResponse(
@@ -7,7 +8,8 @@ public record UserResponse(
         String name,
         String email,
         String phone,
-        String address
+        String address,
+        Role role
 ) {
     public static UserResponse from(User user) {
         return new UserResponse(
@@ -15,7 +17,8 @@ public record UserResponse(
                 user.getName(),
                 user.getEmail(),
                 user.getPhone(),
-                user.getAddress()
+                user.getAddress(),
+                user.getRole()
         );
     }
 }
