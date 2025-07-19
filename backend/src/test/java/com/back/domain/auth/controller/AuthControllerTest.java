@@ -3,7 +3,6 @@ package com.back.domain.auth.controller;
 import com.back.domain.auth.dto.ChangePasswordRequest;
 import com.back.domain.auth.dto.LoginRequest;
 import com.back.domain.auth.dto.SignupRequest;
-import com.back.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
@@ -39,8 +38,6 @@ class AuthControllerTest {
     private static final String TEST_EMAIL = "test1234@example.com";
     private static final String TEST_PASSWORD = "password1234";
     private static final String TEST_NAME = "테스트유저1234";
-    @Autowired
-    private UserService userService;
 
     @Test
     @DisplayName("t1. 회원가입 성공")
@@ -136,12 +133,12 @@ class AuthControllerTest {
     @DisplayName("t5. 비밀번호 변경 성공")
     void changePasswordTest() throws Exception {
         // 1. 회원가입
-        signupUser("newuser@test.com", "oldpassword", "새 사용자");
+        signupUser(TEST_EMAIL, TEST_PASSWORD, TEST_NAME);
 
         // 2. 로그인해서 access token 혹은 쿠키 받기
         MvcResult loginResult = mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new LoginRequest("newuser@test.com", "oldpassword"))))
+                        .content(objectMapper.writeValueAsString(new LoginRequest(TEST_EMAIL, TEST_PASSWORD))))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -151,7 +148,7 @@ class AuthControllerTest {
         mockMvc.perform(post("/api/v1/auth/change-password")
                         .header(HttpHeaders.AUTHORIZATION, accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new ChangePasswordRequest("oldpassword", "newpassword"))))
+                        .content(objectMapper.writeValueAsString(new ChangePasswordRequest(TEST_PASSWORD, "newpassword"))))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("비밀번호가 변경되었습니다")));
     }
