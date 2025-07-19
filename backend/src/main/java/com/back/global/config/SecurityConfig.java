@@ -1,5 +1,6 @@
 package com.back.global.config;
 
+
 import com.back.global.security.auth.AuthenticationEntryPointImpl;
 import com.back.global.security.auth.CustomAccessDeniedHandler;
 import com.back.global.security.jwt.JwtAuthenticationFilter;
@@ -20,6 +21,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
     private final CustomAccessDeniedHandler accessDeniedHandler;
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -62,6 +64,7 @@ public class SecurityConfig {
 //    }
 
     @Bean
+
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }

@@ -26,6 +26,7 @@ class UserControllerTest {
     @Test
     @DisplayName("내 정보 확인")
     @WithUserDetails(value = "admin@test.com", userDetailsServiceBeanName = "customUserDetailsService")
+
     void t1() throws Exception {
         mockMvc.perform(get("/api/v1/users/me"))
                 .andExpect(status().isOk())
