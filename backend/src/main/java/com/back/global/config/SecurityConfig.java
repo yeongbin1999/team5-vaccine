@@ -1,7 +1,8 @@
 package com.back.global.config;
 
-import com.back.global.auth.AuthenticationEntryPointImpl;
-import com.back.global.jwt.JwtAuthenticationFilter;
+import com.back.global.security.auth.AuthenticationEntryPointImpl;
+import com.back.global.security.auth.CustomAccessDeniedHandler;
+import com.back.global.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationEntryPointImpl authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -38,15 +40,24 @@ public class SecurityConfig {
 //    @Bean
 //    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //        return http
-//                .csrf(csrf -> csrf.disable()) // JWT 사용 시 CSRF 불필요
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 비활성화
-//                .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint)) // 인증 실패 처리
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/api/auth/**").permitAll() // 로그인/회원가입 허용
-//                        .requestMatchers(HttpMethod.GET, "/api/public/**").permitAll() // 공개 API 허용
-//                        .anyRequest().authenticated() // 나머지는 인증 필요
+//                .csrf(csrf -> csrf.disable()) // JWT 토큰 방식이므로 CSRF 비활성화
+//                .headers(headers -> headers
+//                        .contentSecurityPolicy(csp -> csp
+//                                .policyDirectives("frame-ancestors 'self'")
+//                        )
 //                )
-//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 미사용
+//                .exceptionHandling(ex -> ex
+//                        .authenticationEntryPoint(authenticationEntryPoint)   // 인증 실패 처리
+//                        .accessDeniedHandler(accessDeniedHandler)             // 인가 실패 처리
+//                )
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/h2-console/**").permitAll()                     // H2 콘솔
+//                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()  // Swagger
+//                        .requestMatchers("/api/v1/auth/**").permitAll()                    // 로그인/회원가입 API 허용
+//                        .anyRequest().authenticated()                                      // 나머지 요청 인증 필요
+//                )
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // JWT 필터 등록
 //                .build();
 //    }
 

@@ -39,6 +39,10 @@ dependencies {
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+    // 추가 어노테이션
+    implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
+
+    // Redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
     // JWT (JJWT)
