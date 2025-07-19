@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.NoSuchElementException; // NoSuchElementException 임포트
 
 @RestController
-@RequestMapping("/api/v1/cart")
+@RequestMapping("/api/cart")
 @RequiredArgsConstructor
 public class CartController {
 
