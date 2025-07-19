@@ -66,4 +66,8 @@ public class User {
     public boolean isAdmin() {
         return this.role == Role.ADMIN;
     }
+
+    public void updatePassword(String encodedNewPassword) {
+        this.password = encodedNewPassword;
+    }
 }
