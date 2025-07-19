@@ -24,7 +24,8 @@ public class UserService {
                         user.getName(),
                         user.getEmail(),
                         user.getPhone(),
-                        user.getAddress()
+                        user.getAddress(),
+                        user.getRole()
                 ))
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }

@@ -11,4 +11,4 @@ spring:
       password: ${REDIS_PASSWORD}
 
 cookie:
-  secure: false
+  secure: true
