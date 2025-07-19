@@ -1,10 +1,14 @@
 package com.back.domain.order.controller;
 
-import com.back.domain.order.dto.order.*;
+import com.back.domain.order.dto.order.OrderDetailDTO;
+import com.back.domain.order.dto.order.OrderListDTO;
+import com.back.domain.order.dto.order.OrderRequestDTO;
+import com.back.domain.order.dto.order.OrderStatusUpdateDTO;
 import com.back.domain.order.dto.orderpay.OrderPayDTO;
 import com.back.domain.order.service.OrderService;
 import com.back.global.security.auth.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +23,21 @@ public class OrderController {
     private final OrderService orderService;
 
     // 1. 주문 생성
-    @PostMapping
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public OrderDetailDTO createOrder(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                      @RequestBody OrderRequestDTO request) {
-        request.setUserId(userDetails.getId());  // 주문자 ID 설정
-        return orderService.createOrder(request);
+    @PostMapping("/orders")
+    public ResponseEntity<OrderDetailDTO> createOrder(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody OrderRequestDTO request
+    ) {
+        // userId 포함된 새 DTO 생성
+        OrderRequestDTO requestWithUserId = new OrderRequestDTO(
+                userDetails.getId(),
+                request.deliveryId(),
+                request.shippingAddress(),
+                request.items()
+        );
+
+        OrderDetailDTO orderDetail = orderService.createOrder(requestWithUserId);
+        return ResponseEntity.ok(orderDetail);
     }
 
     // 2. 주문 결제
