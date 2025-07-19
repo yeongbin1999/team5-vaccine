@@ -55,7 +55,7 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
-        // ✅ 브라우저가 응답 헤더 중 Authorization을 읽을 수 있도록 노출
+        // 브라우저가 응답 헤더 중 Authorization을 읽을 수 있도록 노출
         config.setExposedHeaders(List.of("Authorization"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -89,7 +89,6 @@ public class SecurityConfig {
 //    }
 
     @Bean
-
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
