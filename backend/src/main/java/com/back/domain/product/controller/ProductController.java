@@ -3,11 +3,11 @@ package com.back.domain.product.controller;
 import com.back.domain.product.dto.product.ProductRequestDto;
 import com.back.domain.product.dto.product.ProductResponseDto;
 import com.back.domain.product.service.ProductService;
-import jakarta.validation.Valid; // DTO 유효성 검증을 위한 어노테이션
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus; // HTTP 상태 코드
-import org.springframework.http.ResponseEntity; // HTTP 응답 객체
-import org.springframework.web.bind.annotation.*; // Spring Web 어노테이션들
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
