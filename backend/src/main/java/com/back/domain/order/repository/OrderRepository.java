@@ -24,8 +24,14 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     // 주문 상태별 조회
     List<Order> findByStatus(OrderStatus status);
     
+    // 주문 상태별 조회 (최신순)
+    List<Order> findByStatusOrderByOrderDateDesc(OrderStatus status);
+    
     // 주문 상태별 조회 (페이지네이션, 최신순)
     Page<Order> findByStatusOrderByOrderDateDesc(OrderStatus status, Pageable pageable);
+    
+    // 전체 주문 조회 (최신순) - 관리자용
+    List<Order> findAllByOrderByOrderDateDesc();
     
     // 사용자와 주문 상태로 조회
     List<Order> findByUserAndStatus(User user, OrderStatus status);

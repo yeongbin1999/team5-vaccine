@@ -138,6 +138,20 @@ public class OrderService {
     }
 
     // 관리자 전용 메서드들
+    public List<OrderListDTO> getAllOrders() {
+        return orderRepository.findAllByOrderByOrderDateDesc()
+                .stream()
+                .map(OrderListDTO::from)
+                .toList();
+    }
+
+    public List<OrderListDTO> getAllOrdersByStatus(OrderStatus status) {
+        return orderRepository.findByStatusOrderByOrderDateDesc(status)
+                .stream()
+                .map(OrderListDTO::from)
+                .toList();
+    }
+
     public Page<OrderListDTO> getAllOrdersWithPagination(Pageable pageable, OrderStatus status) {
         Page<Order> orders;
         if (status != null) {

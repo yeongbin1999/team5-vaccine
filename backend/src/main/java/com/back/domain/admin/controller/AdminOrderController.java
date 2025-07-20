@@ -33,7 +33,7 @@ public class AdminOrderController {
     private final OrderService orderService;
 
     @GetMapping
-    @Operation(summary = "관리자 - 모든 주문 조회",
+    @Operation(summary = "관리자 - 모든 주문 조회 (페이징)",
             description = "모든 사용자의 주문 목록을 조회합니다. 페이지네이션, 검색, 필터링이 가능합니다.")
     public ResponseEntity<PageResponseDto<OrderListDTO>> getAllOrders(
             @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") int page,
@@ -45,6 +45,21 @@ public class AdminOrderController {
         
         PageResponseDto<OrderListDTO> response = PageResponseDto.of(orders);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/all")
+    @Operation(summary = "관리자 - 모든 주문 조회 (전체)",
+            description = "모든 사용자의 주문 목록을 페이징 없이 전체 조회합니다.")
+    public ResponseEntity<List<OrderListDTO>> getAllOrdersWithoutPaging(
+            @Parameter(description = "주문 상태 필터") @RequestParam(required = false) OrderStatus status
+    ) {
+        List<OrderListDTO> orders;
+        if (status != null) {
+            orders = orderService.getAllOrdersByStatus(status);
+        } else {
+            orders = orderService.getAllOrders();
+        }
+        return ResponseEntity.ok(orders);
     }
 
     @GetMapping("/statistics")
