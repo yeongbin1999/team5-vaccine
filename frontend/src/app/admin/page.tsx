@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useAdminAuthStore } from '../../features/auth/adminAuthStore';
 import ProductManagement from '@/components/admin/ProductManagement';
+import OrderManagement from '@/components/admin/OrderManagement';
 
 export default function AdminPage() {
   const isAuthenticated = useAdminAuthStore(state => state.isAuthenticated);
@@ -129,7 +130,7 @@ export default function AdminPage() {
               <ProductManagement />
             )}
             {isAuthenticated && selectedMenu === 'order' && (
-              <div>주문관리 컴포넌트</div>
+              <OrderManagement />
             )}
             {isAuthenticated && selectedMenu === 'user' && (
               <div>사용자 관리 컴포넌트</div>

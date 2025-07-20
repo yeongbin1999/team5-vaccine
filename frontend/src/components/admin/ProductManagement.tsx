@@ -9,9 +9,9 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { fetchProducts, fetchCategories } from '@/features/product/api';
 import { apiClient } from '@/lib/backend/apiV1/client';
 
-const ALL_CATEGORY_OPTION = { id: 0, name: '전체' };
+const ALL_CATEGORY_OPTION = { id: 0, name: '카테고리 전체' };
 const STATUS_OPTIONS = [
-  { value: '', label: '전체' },
+  { value: '', label: '상태 전체' },
   { value: '판매중', label: '판매중' },
   { value: '품절', label: '품절' },
 ];
@@ -315,122 +315,133 @@ export default function ProductManagement() {
       )}
       {/* 상품 생성/수정 모달 */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
-            <h2 className="text-lg font-bold mb-4">
-              {editingProduct ? '상품 수정' : '상품 생성'}
-            </h2>
-            <form onSubmit={handleFormSubmit} className="flex flex-col gap-3">
-              {/* 상품명 */}
-              <label className="font-semibold text-sm" htmlFor="modal-name">
-                상품명
-              </label>
-              <input
-                id="modal-name"
-                className="border rounded px-3 py-2"
-                name="name"
-                placeholder="상품명을 입력하세요"
-                value={form.name}
-                onChange={handleFormChange}
-                required
-              />
-              {/* 설명 */}
-              <label
-                className="font-semibold text-sm"
-                htmlFor="modal-description"
-              >
-                설명
-              </label>
-              <textarea
-                id="modal-description"
-                className="border rounded px-3 py-2"
-                name="description"
-                placeholder="상품 설명을 입력하세요"
-                value={form.description}
-                onChange={handleFormChange}
-              />
-              {/* 가격 */}
-              <label className="font-semibold text-sm" htmlFor="modal-price">
-                가격
-              </label>
-              <input
-                id="modal-price"
-                className="border rounded px-3 py-2"
-                name="price"
-                type="number"
-                placeholder="숫자만 입력"
-                value={form.price}
-                onChange={handleFormChange}
-                required
-                min={0}
-              />
-              {/* 재고 */}
-              <label className="font-semibold text-sm" htmlFor="modal-stock">
-                재고
-              </label>
-              <input
-                id="modal-stock"
-                className="border rounded px-3 py-2"
-                name="stock"
-                type="number"
-                placeholder="숫자만 입력"
-                value={form.stock}
-                onChange={handleFormChange}
-                required
-                min={0}
-              />
-              {/* 카테고리 */}
-              <label className="font-semibold text-sm" htmlFor="modal-category">
-                카테고리
-              </label>
-              <select
-                id="modal-category"
-                className="border rounded px-3 py-2"
-                name="category_id"
-                value={form.category_id}
-                onChange={handleFormChange}
-                required
-              >
-                <option value={0}>카테고리 선택</option>
-                {categories
-                  .filter(c => c.id !== 0)
-                  .map(opt => (
-                    <option key={opt.id} value={opt.id}>
-                      {opt.name}
-                    </option>
-                  ))}
-              </select>
-              {/* 이미지 URL */}
-              <label className="font-semibold text-sm" htmlFor="modal-image">
-                이미지 URL
-              </label>
-              <input
-                id="modal-image"
-                className="border rounded px-3 py-2"
-                name="image_url"
-                placeholder="이미지 URL을 입력하세요"
-                value={form.image_url}
-                onChange={handleFormChange}
-              />
-              {formError && (
-                <div className="text-red-500 text-sm">{formError}</div>
-              )}
-              <div className="flex gap-2 mt-2 justify-end">
-                <Button type="submit" disabled={formLoading}>
-                  {editingProduct ? '수정' : '생성'}
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={closeModal}
-                  disabled={formLoading}
+        <>
+          <div className="fixed inset-0 z-40 bg-black/30" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative">
+              <h2 className="text-lg font-bold mb-4">
+                {editingProduct ? '상품 수정' : '상품 생성'}
+              </h2>
+              <form onSubmit={handleFormSubmit} className="flex flex-col gap-3">
+                {/* 상품명 */}
+                <label className="font-semibold text-sm" htmlFor="modal-name">
+                  상품명
+                </label>
+                <input
+                  id="modal-name"
+                  className="border rounded px-3 py-2"
+                  name="name"
+                  placeholder="상품명을 입력하세요"
+                  value={form.name}
+                  onChange={handleFormChange}
+                  required
+                />
+                {/* 설명 */}
+                <label
+                  className="font-semibold text-sm"
+                  htmlFor="modal-description"
                 >
-                  취소
-                </Button>
-              </div>
-            </form>
+                  설명
+                </label>
+                <textarea
+                  id="modal-description"
+                  className="border rounded px-3 py-2"
+                  name="description"
+                  placeholder="상품 설명을 입력하세요"
+                  value={form.description}
+                  onChange={handleFormChange}
+                />
+                {/* 가격 */}
+                <label className="font-semibold text-sm" htmlFor="modal-price">
+                  가격
+                </label>
+                <input
+                  id="modal-price"
+                  className="border rounded px-3 py-2"
+                  name="price"
+                  type="number"
+                  placeholder="숫자만 입력"
+                  value={form.price}
+                  onChange={handleFormChange}
+                  required
+                  min={0}
+                />
+                {/* 재고 */}
+                <label className="font-semibold text-sm" htmlFor="modal-stock">
+                  재고
+                </label>
+                <input
+                  id="modal-stock"
+                  className="border rounded px-3 py-2"
+                  name="stock"
+                  type="number"
+                  placeholder="숫자만 입력"
+                  value={form.stock}
+                  onChange={handleFormChange}
+                  required
+                  min={0}
+                />
+                {/* 카테고리 */}
+                <label className="font-semibold text-sm" htmlFor="modal-category">
+                  카테고리
+                </label>
+                <select
+                  id="modal-category"
+                  className="border rounded px-3 py-2"
+                  name="category_id"
+                  value={form.category_id}
+                  onChange={handleFormChange}
+                  required
+                >
+                  <option value={0} disabled>
+                    카테고리 선택
+                  </option>
+                  {categories.filter(c => c.id !== 0).length === 0 ? (
+                    <option value="" disabled>
+                      카테고리 없음
+                    </option>
+                  ) : (
+                    categories
+                      .filter(c => c.id !== 0)
+                      .map(opt => (
+                        <option key={opt.id} value={opt.id}>
+                          {opt.name}
+                        </option>
+                      ))
+                  )}
+                </select>
+                {/* 이미지 URL */}
+                <label className="font-semibold text-sm" htmlFor="modal-image">
+                  이미지 URL
+                </label>
+                <input
+                  id="modal-image"
+                  className="border rounded px-3 py-2"
+                  name="image_url"
+                  placeholder="이미지 URL을 입력하세요"
+                  value={form.image_url}
+                  onChange={handleFormChange}
+                />
+                {formError && (
+                  <div className="text-red-500 text-sm">{formError}</div>
+                )}
+                <div className="flex gap-2 mt-2 justify-end">
+                  <Button type="submit" disabled={formLoading}>
+                    {editingProduct ? '수정' : '생성'}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={closeModal}
+                    disabled={formLoading}
+                  >
+                    취소
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
