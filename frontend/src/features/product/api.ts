@@ -1,3 +1,4 @@
+import { apiClient } from '@/lib/backend/apiV1/client';
 import { Product } from './types';
 
 // API 응답 데이터 타입 정의
@@ -32,4 +33,9 @@ export function mapToProduct(item: ProductApiLike): Product {
     updated_at: item.updated_at || item.updatedAt || new Date().toISOString(),
     category_id: item.category_id ?? item.categoryId ?? 1,
   };
+}
+
+export async function fetchProducts(): Promise<any[]> {
+  const res = await apiClient.api.getAllProducts();
+  return res.data;
 }

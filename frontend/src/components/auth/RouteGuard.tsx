@@ -13,19 +13,25 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
   const { user, isAuthenticated, isAuthChecked } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith('/admin');
 
   useEffect(() => {
     // 인증 상태 확인이 완료되지 않았으면 대기
     if (!isAuthChecked) return;
 
     if (!isAuthenticated) {
-      // 로그인 없음 → 로그인 페이지로
-      router.push(`/login?redirect=${pathname}`);
+      const isAdminRoute = pathname.startsWith('/admin');
+      if (isAdminRoute) {
+        // /admin에서는 리다이렉트하지 않음 (SPA에서 로그인 폼 렌더)
+        return;
+      }
+      // 그 외는 기존대로 로그인 페이지로 리다이렉트
+      const loginPath = isAdminRoute ? '/admin/login' : '/login';
+      router.push(`${loginPath}?redirect=${pathname}`);
       return;
     }
 
     if (requiredRole && user?.role !== requiredRole) {
-      // 로그인은 했지만 권한 부족 → 접근 거부 페이지
       router.push('/access-denied');
       return;
     }
@@ -52,6 +58,11 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
 
   // 로그인 필요 (인증 상태 확인 완료 후)
   if (!isAuthenticated) {
+    const isAdminRoute = pathname.startsWith('/admin');
+    if (isAdminRoute) {
+      // /admin에서는 리다이렉트하지 않고 children만 렌더
+      return <>{children}</>;
+    }
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
