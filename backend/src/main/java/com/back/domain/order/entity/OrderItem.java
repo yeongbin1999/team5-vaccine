@@ -2,14 +2,16 @@ package com.back.domain.order.entity;
 
 import com.back.domain.product.entity.Product;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "order_item")
 public class OrderItem {
 

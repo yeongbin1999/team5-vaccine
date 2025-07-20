@@ -6,8 +6,8 @@ spring:
     password:
   jpa:
     hibernate:
-      ddl-auto: none
-    defer-datasource-initialization: true
+      ddl-auto: update
+    defer-datasource-initialization: false
   sql:
     init:
       mode: always
