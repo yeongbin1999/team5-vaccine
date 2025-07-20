@@ -76,11 +76,17 @@ export default function CategoryManagement() {
     }
   };
   const handleDelete = async (cat: CategoryResponseDto) => {
-    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+    if (!window.confirm(`정말 "${cat.name}" 카테고리를 삭제하시겠습니까?`)) return;
     try {
       await apiClient.api.deleteCategory(cat.id!);
       await fetchCategories();
-    } catch (err) {
+    } catch (err: any) {
+      // 409 Conflict 처리
+      if (err?.response?.status === 409) {
+        alert('이 카테고리는 다른 데이터와 연관되어 있어 삭제할 수 없습니다.');
+        return;
+      }
+
       alert('삭제에 실패했습니다.');
     }
   };

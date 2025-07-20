@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import type { ProductWithCategoryName } from '@/features/product/api';
 import { DataTable } from '@/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/react-table';
-import { fetchProducts, fetchCategories } from '@/features/product/api';
+import { fetchProducts, fetchCategories, deleteProduct } from '@/features/product/api';
 import { apiClient } from '@/lib/backend/apiV1/client';
 
 const ALL_CATEGORY_OPTION = { id: 0, name: '카테고리 전체' };
@@ -122,6 +122,21 @@ export default function ProductManagement() {
     }
   };
 
+  // 상품 삭제 핸들러
+  const handleDelete = async (productId: number) => {
+    if (!window.confirm('정말로 이 상품을 삭제하시겠습니까?')) return;
+    setFormLoading(true);
+    try {
+      await deleteProduct(productId);
+      const [productsData] = await Promise.all([fetchProducts()]);
+      setProducts(productsData);
+    } catch (err) {
+      alert('상품 삭제에 실패했습니다.');
+    } finally {
+      setFormLoading(false);
+    }
+  };
+
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -225,6 +240,13 @@ export default function ProductManagement() {
               onClick={() => openEditModal(row.original)}
             >
               수정
+            </button>
+            <button
+              className="p-1 px-2 text-xs rounded bg-red-600 hover:bg-red-700 text-white"
+              onClick={() => handleDelete(row.original.id)}
+              disabled={formLoading}
+            >
+              삭제
             </button>
           </div>
         ),

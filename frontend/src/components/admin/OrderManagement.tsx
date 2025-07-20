@@ -15,7 +15,7 @@ const STATUS_OPTIONS = [
   { value: '배송완료', label: '배송완료' },
   { value: '취소', label: '취소' },
 ];
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 7;
 
 export default function OrderManagement() {
   // const router = useRouter(); // not needed for modal detail

@@ -52,3 +52,7 @@ export async function fetchCategories(): Promise<Category[]> {
     parent_id: item.parentId,
   }));
 }
+
+export async function deleteProduct(id: number): Promise<void> {
+  await apiClient.api.deleteProduct(id);
+}
