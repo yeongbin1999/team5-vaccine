@@ -39,7 +39,20 @@ public class OrderController {
         return ResponseEntity.ok(orderDetail);
     }
 
+<<<<<<< HEAD
     // 2. 내 주문 목록 조회
+=======
+    // 2. 주문 결제 **필요없음
+    @PostMapping("/{orderId}/pay")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public OrderDetailDTO payForOrder(@PathVariable int orderId,
+                                      @AuthenticationPrincipal CustomUserDetails userDetails,
+                                      @RequestBody OrderPayDTO dto) {
+        return orderService.payForOrder(orderId, dto, userDetails.getId()); // 사용자 ID 전달
+    }
+
+    // 3. 내 주문 목록 조회
+>>>>>>> main
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public List<OrderListDTO> getMyOrders(@AuthenticationPrincipal CustomUserDetails userDetails) {

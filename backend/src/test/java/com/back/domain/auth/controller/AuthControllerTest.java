@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -72,6 +73,7 @@ class AuthControllerTest {
 
     @Test
     @DisplayName("t3. 로그인 후 로그아웃 시 refreshToken 쿠키 삭제 및 서버단 RefreshToken 제거")
+    @WithMockUser
     void t3_logout_success() throws Exception {
         // 회원가입 + 로그인
         signupUser(TEST_EMAIL, TEST_PASSWORD, TEST_NAME);
