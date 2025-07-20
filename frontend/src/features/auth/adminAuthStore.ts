@@ -5,6 +5,11 @@ const typedApiClient = apiClient as typeof apiClient & {
   api: import('@/lib/backend/apiV1/api').Api<any>['api'];
 };
 import { Api } from '@/lib/backend/apiV1/api';
+import { jwtDecode } from 'jwt-decode';
+
+interface JwtPayload {
+  role?: string;
+}
 
 interface AdminAuthStore {
   isAuthenticated: boolean;
@@ -29,20 +34,13 @@ export const useAdminAuthStore = create<AdminAuthStore>(set => ({
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
         localStorage.setItem('accessToken', token);
-        // 로그인 후 getMe로 role 확인
-        try {
-          const userInfo = await typedApiClient.api.getMe();
-          const role = userInfo.data.role || '';
-          if (role === 'ADMIN') {
-            set({ isAuthenticated: true, isAuthChecked: true, user: { role } });
-            return true;
-          } else {
-            // 일반 유저면 강제 로그아웃
-            localStorage.removeItem('accessToken');
-            set({ isAuthenticated: false, isAuthChecked: true, user: null });
-            return false;
-          }
-        } catch (e) {
+        // JWT 파싱
+        const decoded: JwtPayload = jwtDecode(token);
+        const role = decoded.role || '';
+        if (role === 'ADMIN') {
+          set({ isAuthenticated: true, isAuthChecked: true, user: { role } });
+          return true;
+        } else {
           localStorage.removeItem('accessToken');
           set({ isAuthenticated: false, isAuthChecked: true, user: null });
           return false;
@@ -59,7 +57,7 @@ export const useAdminAuthStore = create<AdminAuthStore>(set => ({
     localStorage.removeItem('accessToken');
     set({ isAuthenticated: false, isAuthChecked: true, user: null });
   },
-  checkAuth: async () => {
+  checkAuth: () => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('accessToken');
       if (!token) {
@@ -67,8 +65,8 @@ export const useAdminAuthStore = create<AdminAuthStore>(set => ({
         return;
       }
       try {
-        const userInfo = await typedApiClient.api.getMe();
-        const role = userInfo.data.role || '';
+        const decoded: JwtPayload = jwtDecode(token);
+        const role = decoded.role || '';
         if (role === 'ADMIN') {
           set({ isAuthenticated: true, isAuthChecked: true, user: { role } });
         } else {

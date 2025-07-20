@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useAdminAuthStore } from '@/features/auth/adminAuthStore';
 import { useEffect } from 'react';
 
@@ -23,4 +23,4 @@ export function AdminRouteGuard({ children }: { children: React.ReactNode }) {
 
   // 인증 체크가 끝났으면 children(로그인 폼 또는 관리자 페이지)을 그대로 렌더
   return <>{children}</>;
-} 
+}
