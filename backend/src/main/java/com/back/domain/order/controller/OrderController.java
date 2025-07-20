@@ -32,8 +32,9 @@ public class OrderController {
                          "- 상품 재고를 자동으로 차감합니다.\n" +
                          "- 재고 부족시 InsufficientStockException이 발생합니다.\n" +
                          "- 주문 생성 후 '배송준비중' 상태로 설정됩니다.")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<OrderDetailDTO> createOrder(
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody OrderRequestDTO request
     ) {
         // 테스트 환경에서는 Mock User를 사용하므로 기본 ID 사용
@@ -55,7 +56,7 @@ public class OrderController {
     @Operation(summary = "내 주문 목록 조회", 
             description = "현재 사용자의 모든 주문 목록을 조회합니다.")
     public ResponseEntity<List<OrderListDTO>> getMyOrders(
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         Integer userId = getCurrentUserId(userDetails);
         List<OrderListDTO> orders = orderService.getMyOrders(userId);
         return ResponseEntity.ok(orders);
@@ -67,7 +68,7 @@ public class OrderController {
             description = "특정 주문의 상세 정보를 조회합니다. (포함된 상품, 배송 정보, 결제 정보 등)")
     public ResponseEntity<OrderDetailDTO> getOrderDetail(
             @PathVariable Integer orderId,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         Integer userId = getCurrentUserId(userDetails);
         OrderDetailDTO orderDetail = orderService.getOrderDetail(orderId, userId);
         return ResponseEntity.ok(orderDetail);
