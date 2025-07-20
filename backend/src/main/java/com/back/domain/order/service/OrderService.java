@@ -34,7 +34,7 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final EntityManager entityManager;
 
-    // 1. 주문 생성
+    @Transactional
     public OrderDetailDTO createOrder(OrderRequestDTO request) {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
@@ -53,6 +53,14 @@ public class OrderService {
         for (OrderItemRequestDTO item : request.items()) {
             Product product = productRepository.findById(item.productId())
                     .orElseThrow(() -> new IllegalArgumentException("상품 없음"));
+
+            // 재고 확인 및 차감
+            int remain = product.getStock() - item.quantity();
+            if (remain < 0) {
+                throw new IllegalArgumentException("상품 '" + product.getName() + "'의 재고가 부족합니다.");
+            }
+            product.setStock(remain);
+
             OrderItem orderItem = new OrderItem();
             orderItem.setOrder(savedOrder);
             orderItem.setProduct(product);
@@ -66,6 +74,7 @@ public class OrderService {
         savedOrder.setTotalPrice(totalPrice);
         return OrderDetailDTO.from(savedOrder, orderItemRepository.findByOrder(savedOrder));
     }
+
 
     // 2. 내 주문 목록 조회
     public List<OrderListDTO> getMyOrders(int userId) {

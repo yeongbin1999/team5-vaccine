@@ -16,18 +16,16 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/orders")
 public class OrderController {
 
     private final OrderService orderService;
 
-    // 1. 주문 생성
-    @PostMapping
+    // 사용자 - 주문 생성
+    @PostMapping("/api/v1/orders")
     public ResponseEntity<OrderDetailDTO> createOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody OrderRequestDTO request
     ) {
-        // userId 포함된 새 DTO 생성
         OrderRequestDTO requestWithUserId = new OrderRequestDTO(
                 userDetails.getId(),
                 request.deliveryId(),
@@ -39,30 +37,30 @@ public class OrderController {
         return ResponseEntity.ok(orderDetail);
     }
 
-    // 2. 내 주문 목록 조회
-    @GetMapping
+    // 사용자 - 내 주문 목록 조회
+    @GetMapping("/api/v1/orders")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public List<OrderListDTO> getMyOrders(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return orderService.getMyOrders(userDetails.getId());
     }
 
-    // 3. 주문 상세 조회 (유저 본인의 주문만 가능)
-    @GetMapping("/{orderId}")
+    // 사용자 - 주문 상세 조회
+    @GetMapping("/api/v1/orders/{orderId}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public OrderDetailDTO getOrderDetail(@PathVariable int orderId,
                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
         return orderService.getOrderDetail(orderId, userDetails.getId());
     }
 
-    // 4. 관리자 - 전체 주문 목록 조회
-    @GetMapping("/admin/all")
+    // 관리자 - 전체 주문 목록 조회
+    @GetMapping("/api/v1/admin/orders")
     @PreAuthorize("hasRole('ADMIN')")
     public List<OrderListDTO> getAllOrders() {
         return orderService.getAllOrders();
     }
 
-    // 5. 관리자 - 주문 상태 변경
-    @PatchMapping("/admin/{orderId}/status")
+    // 관리자 - 주문 상태 변경
+    @PatchMapping("/api/v1/admin/orders/{orderId}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public OrderDetailDTO updateOrderStatus(@PathVariable int orderId,
                                             @RequestBody OrderStatusUpdateDTO dto) {
