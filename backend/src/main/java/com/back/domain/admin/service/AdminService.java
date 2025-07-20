@@ -19,10 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -114,7 +112,7 @@ public class AdminService {
         return allOrders.stream()
                 .collect(Collectors.groupingBy(
                         order -> order.getOrderDate().toLocalDate(),
-                        Collectors.summingLong(Order::getTotalPrice)
+                        Collectors.summingLong(order -> order.getTotalPrice().longValue())
                 ))
                 .entrySet().stream()
                 .map(entry -> new SalesStatisticsResponseDto(entry.getKey(), entry.getValue()))
@@ -128,7 +126,8 @@ public class AdminService {
      * @return 상품별 판매 통계 목록
      */
     public List<ProductSalesStatisticsResponseDto> getProductSalesStatistics() {
-        List<OrderItem> allOrderItems = orderRepository.findAllOrderItemsWithProduct();
+        // OrderItemRepository를 통해 모든 주문 항목과 상품 정보를 함께 조회
+        List<OrderItem> allOrderItems = orderItemRepository.findAllWithProduct();
 
         return allOrderItems.stream()
                 .collect(Collectors.groupingBy(
@@ -138,8 +137,8 @@ public class AdminService {
                                 orderItem -> new ProductSalesStatisticsResponseDto(
                                         orderItem.getProduct().getId(),
                                         orderItem.getProduct().getName(),
-                                        (long) orderItem.getQuantity(),
-                                        (long) orderItem.getQuantity() * orderItem.getUnitPrice()
+                                        orderItem.getQuantity().longValue(),
+                                        orderItem.getQuantity().longValue() * orderItem.getUnitPrice().longValue()
                                 ),
                                 (acc, item) -> new ProductSalesStatisticsResponseDto(
                                         item.productId(),

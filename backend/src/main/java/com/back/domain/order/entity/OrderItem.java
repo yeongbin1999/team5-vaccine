@@ -17,7 +17,7 @@ public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
-    private int id;
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
@@ -28,13 +28,21 @@ public class OrderItem {
     private Product product;
 
     @Column(nullable = false)
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "unit_price", nullable = false)
-    private int unitPrice;
+    private Integer unitPrice;
 
-    public int getTotalPrice() {
+    public Integer getTotalPrice() {
         return this.unitPrice * this.quantity;
     }
 
+    // 편의 메서드
+    public void changeQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public void changeUnitPrice(Integer unitPrice) {
+        this.unitPrice = unitPrice;
+    }
 }
