@@ -3,7 +3,6 @@ import { apiClient } from '@/lib/backend/apiV1/client';
 import type { LoginRequest, SignupRequest } from '@/lib/backend/apiV1/api';
 import { useCartStore } from '@/features/cart/cartStore';
 import { fetchCart, addToCart, updateCartItem } from '@/features/cart/api';
-import { queryClient } from '@/components/providers/QueryProvider';
 
 // 브라우저 환경에서만 localStorage 사용
 const isBrowser = typeof window !== 'undefined';
@@ -51,7 +50,11 @@ export const useAuthStore = create<AuthStore>(set => ({
   isLoading: false,
   isAuthChecked: false,
 
-  login: async function (this: AuthStore, email: string, password: string): Promise<User | null> {
+  login: async function (
+    this: AuthStore,
+    email: string,
+    password: string
+  ): Promise<User | null> {
     set({ isLoading: true });
 
     try {
@@ -205,45 +208,3 @@ export const useAuthStore = create<AuthStore>(set => ({
     }
   },
 }));
-
-// 게스트 장바구니와 서버 장바구니 병합 함수
-async function mergeGuestCartWithServerCart() {
-  const localCartItems = useCartStore.getState().items; // 게스트 장바구니
-  const serverCart = await fetchCart(); // 서버 장바구니
-
-  const serverCartMap = new Map<number, { id: number; quantity: number }>();
-  serverCart.forEach(item => {
-    serverCartMap.set(Number(item.productId), {
-      id: item.id, // cartItemId
-      quantity: item.quantity,
-    });
-  });
-
-  for (const guestItem of localCartItems) {
-    const pid = Number(guestItem.productId);
-    if (isNaN(pid)) continue; // 잘못된 productId 스킵
-
-    const serverItem = serverCartMap.get(pid);
-    if (serverItem) {
-      // 서버에 이미 있는 경우 → 수량 합산 후 업데이트
-      await updateCartItem({
-        itemId: serverItem.id,
-        quantity: serverItem.quantity + guestItem.quantity,
-      });
-    } else {
-      // 서버에 없는 경우 → 새로 추가
-      await addToCart({
-        productId: pid,
-        quantity: guestItem.quantity,
-      });
-    }
-  }
-
-  // 병합 완료 후 서버 장바구니 다시 fetch
-  const mergedCart = await fetchCart();
-  useCartStore.setState({ items: mergedCart });
-  sessionStorage.setItem(
-    'cart-storage',
-    JSON.stringify({ state: { items: mergedCart } })
-  );
-}

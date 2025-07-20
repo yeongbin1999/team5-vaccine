@@ -8,7 +8,7 @@ import { useAuthStore } from '@/features/auth/authStore';
 import { useCartHydrated } from '@/features/cart/cartStore';
 
 // JWT 디코드 함수 (jwt-decode 없이)
-function decodeJwtPayload(token: string): any {
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -63,8 +63,8 @@ export function LoginForm() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setIsLoading(true);
     setError('');
 
@@ -83,15 +83,24 @@ export function LoginForm() {
     try {
       // 1. 로그인 API 직접 호출 (useAuthStore.login 대신)
       const loginData = { email: formData.email, password: formData.password };
-      const response = await (await import('@/lib/backend/apiV1/client')).apiClient.api.login(loginData);
-      const authHeader = response.headers['authorization'] || response.headers['Authorization'] || response.headers['AUTHORIZATION'];
+      const clientModule = await import('@/lib/backend/apiV1/client');
+      const response = await clientModule.apiClient.api.login(loginData);
+      const authHeader =
+        response.headers['authorization'] ||
+        response.headers['Authorization'] ||
+        response.headers['AUTHORIZATION'];
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
         // JWT 디코드해서 role 확인
         const payload = decodeJwtPayload(token);
-        const role = payload?.role;
+        const role =
+          payload && typeof payload === 'object' && 'role' in payload
+            ? (payload as { role?: string }).role
+            : undefined;
         if (role === 'ADMIN') {
-          setError('관리자 계정으로는 일반 사용자 페이지에서 로그인할 수 없습니다.');
+          setError(
+            '관리자 계정으로는 일반 사용자 페이지에서 로그인할 수 없습니다.'
+          );
           localStorage.removeItem('accessToken');
           setIsLoading(false);
           return;
