@@ -130,8 +130,13 @@ export default function ProductManagement() {
       await deleteProduct(productId);
       const [productsData] = await Promise.all([fetchProducts()]);
       setProducts(productsData);
-    } catch (err) {
-      alert('상품 삭제에 실패했습니다.');
+    } catch (err: any) {
+      if (err.response?.status === 409) {
+        // 409 Conflict - 상품이 다른 곳에서 사용 중
+        alert(err.response.data.error || '이 상품은 다른 곳에서 사용 중이므로 삭제할 수 없습니다.');
+      } else {
+        alert('상품 삭제에 실패했습니다.');
+      }
     } finally {
       setFormLoading(false);
     }
