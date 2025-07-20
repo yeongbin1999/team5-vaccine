@@ -5,7 +5,7 @@ import { OrderCard } from './components/OrderCard';
 import { useQuery } from '@tanstack/react-query';
 import { getMyOrders } from './api';
 import { useAuthStore } from '@/features/auth/authStore';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { getOrderDetail } from './api';
 import { useSearchParams } from 'next/navigation';
 // import { toast } from 'sonner';
@@ -79,7 +79,7 @@ function OrderDetailModal({
   );
 }
 
-export default function OrdersPage() {
+function OrdersPageInner() {
   const user = useAuthStore(state => state.user);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const isAuthChecked = useAuthStore(state => state.isAuthChecked);
@@ -162,6 +162,12 @@ export default function OrdersPage() {
             <p className="text-gray-500 mt-2">
               주문 내역을 확인하려면 로그인해주세요.
             </p>
+            <a
+              href="/login"
+              className="inline-block mt-6 px-6 py-2 bg-amber-500 text-white rounded hover:bg-amber-600 font-semibold shadow transition-colors"
+            >
+              로그인하러가기
+            </a>
           </div>
         </div>
       </div>
@@ -230,5 +236,13 @@ export default function OrdersPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense>
+      <OrdersPageInner />
+    </Suspense>
   );
 }
