@@ -115,7 +115,7 @@ export default function ProductManagement() {
       const [productsData] = await Promise.all([fetchProducts()]);
       setProducts(productsData);
       closeModal();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setFormError('저장에 실패했습니다.');
     } finally {
       setFormLoading(false);
@@ -291,7 +291,6 @@ export default function ProductManagement() {
         <DataTable
           columns={columns}
           data={paged}
-          rowClassName="border-b border-gray-200"
         />
       )}
       {/* 페이지네이션 */}

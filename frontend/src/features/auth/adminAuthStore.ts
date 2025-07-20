@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { apiClient } from '@/lib/backend/apiV1/client';
 // 타입 단언으로 api 프로퍼티가 있다고 명시
 const typedApiClient = apiClient as typeof apiClient & {
-  api: import('@/lib/backend/apiV1/api').Api<any>['api'];
+  api: import('@/lib/backend/apiV1/api').Api<unknown>['api'];
 };
 import { Api } from '@/lib/backend/apiV1/api';
 import { jwtDecode } from 'jwt-decode';
