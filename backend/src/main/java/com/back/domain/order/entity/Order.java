@@ -22,24 +22,25 @@ public class Order {
     @GeneratedValue(strategy = IDENTITY)
     private int id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(name = "total_price", nullable = false)
     private int totalPrice;
 
-    @Column(name = "order_date")
+    @Column(name = "order_date", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime orderDate;
 
-    @Column(name = "shipping_address")
-    private String shippingAddress;
+    @Column(name = "shipping_address", length = 200)
+    private String address;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "ENUM('배송준비중','배송중','배송완료','취소') DEFAULT '배송준비중'")
     private OrderStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "delivery_id")
+    @JoinColumn(name = "delivery_id", foreignKey = @ForeignKey(name = "fk_order_delivery"))
     private Delivery delivery;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
@@ -48,7 +49,7 @@ public class Order {
     @PrePersist
     public void prePersist() {
         if (status == null) {
-            status = OrderStatus.결제대기;
+            status = OrderStatus.배송준비중;
         }
         if (orderDate == null) {
             orderDate = LocalDateTime.now();

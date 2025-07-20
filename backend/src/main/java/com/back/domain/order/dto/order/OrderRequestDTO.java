@@ -7,7 +7,7 @@ import java.util.List;
 public record OrderRequestDTO(
         int userId,
         int deliveryId,
-        String shippingAddress,
+        String address,
         List<OrderItemRequestDTO> items
 ) {}
 
