@@ -123,7 +123,7 @@ public class OrderService {
     // 3. 주문 상세 조회 (관리자는 모두 가능, 일반 사용자는 본인 주문만)
     public OrderDetailDTO getOrderDetail(int orderId, int userId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("주문 없음"));
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
