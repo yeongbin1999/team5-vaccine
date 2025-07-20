@@ -3,13 +3,12 @@ package com.back.domain.admin.service;
 import com.back.domain.admin.dto.PageResponseDto;
 import com.back.domain.admin.dto.ProductSalesStatisticsResponseDto;
 import com.back.domain.admin.dto.SalesStatisticsResponseDto;
-import com.back.domain.user.dto.UpdateUserRequest;
-import com.back.domain.user.dto.UserResponse;
-
 import com.back.domain.order.entity.Order;
 import com.back.domain.order.entity.OrderItem;
 import com.back.domain.order.repository.OrderItemRepository;
 import com.back.domain.order.repository.OrderRepository;
+import com.back.domain.user.dto.UpdateUserRequest;
+import com.back.domain.user.dto.UserResponse;
 import com.back.domain.user.entity.User;
 import com.back.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -46,8 +43,8 @@ public class AdminService {
     public PageResponseDto<UserResponse> getAllUsers(Pageable pageable, String search) {
         Page<User> userPage;
         if (search != null && !search.trim().isEmpty()) {
-            // 변경된 메서드 이름 findByEmail 사용 (이메일 또는 이름 검색)
-            userPage = userRepository.findByEmail(search, search, pageable);
+            // 변경된 UserRepository 메서드 호출: findByEmailOrNameContaining 사용
+            userPage = userRepository.findByEmailOrNameContaining(search, pageable);
         } else {
             userPage = userRepository.findAll(pageable);
         }
