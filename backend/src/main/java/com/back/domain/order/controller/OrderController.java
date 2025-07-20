@@ -4,7 +4,6 @@ import com.back.domain.order.dto.order.OrderDetailDTO;
 import com.back.domain.order.dto.order.OrderListDTO;
 import com.back.domain.order.dto.order.OrderRequestDTO;
 import com.back.domain.order.dto.order.OrderStatusUpdateDTO;
-import com.back.domain.order.dto.orderpay.OrderPayDTO;
 import com.back.domain.order.service.OrderService;
 import com.back.global.security.auth.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ public class OrderController {
         OrderRequestDTO requestWithUserId = new OrderRequestDTO(
                 userDetails.getId(),
                 request.deliveryId(),
-                request.shippingAddress(),
+                request.address(),
                 request.items()
         );
 
@@ -40,23 +39,14 @@ public class OrderController {
         return ResponseEntity.ok(orderDetail);
     }
 
-    // 2. 주문 결제 **필요없음
-    @PostMapping("/{orderId}/pay")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public OrderDetailDTO payForOrder(@PathVariable int orderId,
-                                      @AuthenticationPrincipal CustomUserDetails userDetails,
-                                      @RequestBody OrderPayDTO dto) {
-        return orderService.payForOrder(orderId, dto, userDetails.getId()); // 사용자 ID 전달
-    }
-
-    // 3. 내 주문 목록 조회
+    // 2. 내 주문 목록 조회
     @GetMapping
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public List<OrderListDTO> getMyOrders(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return orderService.getMyOrders(userDetails.getId());
     }
 
-    // 4. 주문 상세 조회 (유저 본인의 주문만 가능)
+    // 3. 주문 상세 조회 (유저 본인의 주문만 가능)
     @GetMapping("/{orderId}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public OrderDetailDTO getOrderDetail(@PathVariable int orderId,
@@ -64,14 +54,14 @@ public class OrderController {
         return orderService.getOrderDetail(orderId, userDetails.getId());
     }
 
-    // 5. 관리자 - 전체 주문 목록 조회
+    // 4. 관리자 - 전체 주문 목록 조회
     @GetMapping("/admin/all")
     @PreAuthorize("hasRole('ADMIN')")
     public List<OrderListDTO> getAllOrders() {
         return orderService.getAllOrders();
     }
 
-    // 6. 관리자 - 주문 상태 변경
+    // 5. 관리자 - 주문 상태 변경
     @PatchMapping("/admin/{orderId}/status")
     @PreAuthorize("hasRole('ADMIN')")
     public OrderDetailDTO updateOrderStatus(@PathVariable int orderId,
