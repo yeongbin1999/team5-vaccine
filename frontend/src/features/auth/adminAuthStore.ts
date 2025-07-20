@@ -9,6 +9,7 @@ import { Api } from '@/lib/backend/apiV1/api';
 interface AdminAuthStore {
   isAuthenticated: boolean;
   isAuthChecked: boolean;
+  user: { role: string } | null;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
   checkAuth: () => void;
@@ -17,6 +18,7 @@ interface AdminAuthStore {
 export const useAdminAuthStore = create<AdminAuthStore>(set => ({
   isAuthenticated: false,
   isAuthChecked: false,
+  user: null,
   login: async (username, password) => {
     try {
       const response = await typedApiClient.api.login({
@@ -27,35 +29,55 @@ export const useAdminAuthStore = create<AdminAuthStore>(set => ({
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
         localStorage.setItem('accessToken', token);
-        set({ isAuthenticated: true, isAuthChecked: true });
-        return true;
+        // 로그인 후 getMe로 role 확인
+        try {
+          const userInfo = await typedApiClient.api.getMe();
+          const role = userInfo.data.role || '';
+          if (role === 'ADMIN') {
+            set({ isAuthenticated: true, isAuthChecked: true, user: { role } });
+            return true;
+          } else {
+            // 일반 유저면 강제 로그아웃
+            localStorage.removeItem('accessToken');
+            set({ isAuthenticated: false, isAuthChecked: true, user: null });
+            return false;
+          }
+        } catch (e) {
+          localStorage.removeItem('accessToken');
+          set({ isAuthenticated: false, isAuthChecked: true, user: null });
+          return false;
+        }
       }
-      set({ isAuthenticated: false, isAuthChecked: true });
+      set({ isAuthenticated: false, isAuthChecked: true, user: null });
       return false;
     } catch (e) {
-      set({ isAuthenticated: false, isAuthChecked: true });
+      set({ isAuthenticated: false, isAuthChecked: true, user: null });
       return false;
     }
   },
   logout: () => {
     localStorage.removeItem('accessToken');
-    set({ isAuthenticated: false, isAuthChecked: true });
+    set({ isAuthenticated: false, isAuthChecked: true, user: null });
   },
   checkAuth: async () => {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('accessToken');
       if (!token) {
-        set({ isAuthenticated: false, isAuthChecked: true });
+        set({ isAuthenticated: false, isAuthChecked: true, user: null });
         return;
       }
       try {
-        // 서버에 토큰 검증 요청 (예: getMe API)
-        await typedApiClient.api.getMe();
-        set({ isAuthenticated: true, isAuthChecked: true });
+        const userInfo = await typedApiClient.api.getMe();
+        const role = userInfo.data.role || '';
+        if (role === 'ADMIN') {
+          set({ isAuthenticated: true, isAuthChecked: true, user: { role } });
+        } else {
+          localStorage.removeItem('accessToken');
+          set({ isAuthenticated: false, isAuthChecked: true, user: null });
+        }
       } catch (e) {
-        // 토큰이 유효하지 않으면 로그아웃 처리
         localStorage.removeItem('accessToken');
-        set({ isAuthenticated: false, isAuthChecked: true });
+        set({ isAuthenticated: false, isAuthChecked: true, user: null });
       }
     }
   },
