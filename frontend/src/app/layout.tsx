@@ -2,10 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { QueryProvider } from '@/components/providers/QueryProvider';
-import { AuthInitializer } from '@/components/auth/AuthInitializer';
 import { Toaster } from '@/components/ui/sonner';
 import AppShell from '@/components/layout/AppShell';
-import { useEffect, useState } from 'react';
 import { ClientOnlyAuthInit } from '@/components/auth/ClientOnlyAuthInit';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });

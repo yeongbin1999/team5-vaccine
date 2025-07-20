@@ -13,7 +13,6 @@ export function RouteGuard({ children, requiredRole }: RouteGuardProps) {
   const { user, isAuthenticated, isAuthChecked } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith('/admin');
 
   useEffect(() => {
     // 인증 상태 확인이 완료되지 않았으면 대기

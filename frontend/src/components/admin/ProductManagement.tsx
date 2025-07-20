@@ -1,12 +1,15 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useMemo, useRef } from 'react';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import type { ProductWithCategoryName } from '@/features/product/api';
 import { DataTable } from '@/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/react-table';
-import { fetchProducts, fetchCategories, deleteProduct } from '@/features/product/api';
+import {
+  fetchProducts,
+  fetchCategories,
+  deleteProduct,
+} from '@/features/product/api';
 import { apiClient } from '@/lib/backend/apiV1/client';
 
 const ALL_CATEGORY_OPTION = { id: 0, name: '카테고리 전체' };
@@ -45,7 +48,6 @@ export default function ProductManagement() {
   });
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 모달 열기 (생성/수정)
   const openCreateModal = () => {
@@ -115,7 +117,7 @@ export default function ProductManagement() {
       const [productsData] = await Promise.all([fetchProducts()]);
       setProducts(productsData);
       closeModal();
-    } catch (err: unknown) {
+    } catch {
       setFormError('저장에 실패했습니다.');
     } finally {
       setFormLoading(false);
@@ -130,10 +132,22 @@ export default function ProductManagement() {
       await deleteProduct(productId);
       const [productsData] = await Promise.all([fetchProducts()]);
       setProducts(productsData);
-    } catch (err: any) {
-      if (err.response?.status === 409) {
+    } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === 'object' &&
+        'response' in err &&
+        err.response &&
+        typeof err.response === 'object' &&
+        'status' in err.response &&
+        err.response.status === 409
+      ) {
         // 409 Conflict - 상품이 다른 곳에서 사용 중
-        alert(err.response.data.error || '이 상품은 다른 곳에서 사용 중이므로 삭제할 수 없습니다.');
+        const responseData = err.response as { data?: { error?: string } };
+        alert(
+          responseData.data?.error ||
+            '이 상품은 다른 곳에서 사용 중이므로 삭제할 수 없습니다.'
+        );
       } else {
         alert('상품 삭제에 실패했습니다.');
       }
@@ -177,7 +191,7 @@ export default function ProductManagement() {
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // shadcn DataTable columns 정의
-  const columns = useMemo<ColumnDef<ProductWithCategoryName, any>[]>(
+  const columns = useMemo<ColumnDef<ProductWithCategoryName, unknown>[]>(
     () => [
       {
         accessorKey: 'image_url',
@@ -188,11 +202,13 @@ export default function ProductManagement() {
               ? row.original.image_url
               : '/coffee.jpeg';
           return (
-            <img
-              src={url}
-              alt={row.original.name}
-              className="w-16 h-16 object-contain mx-auto"
-            />
+            <div className="w-16 h-16 mx-auto">
+              <img
+                src={url}
+                alt={row.original.name}
+                className="w-full h-full object-contain"
+              />
+            </div>
           );
         },
       },
@@ -257,7 +273,7 @@ export default function ProductManagement() {
         ),
       },
     ],
-    [router]
+    [categories, formLoading]
   );
 
   return (
@@ -315,10 +331,7 @@ export default function ProductManagement() {
           등록된 상품이 없습니다.
         </div>
       ) : (
-        <DataTable
-          columns={columns}
-          data={paged}
-        />
+        <DataTable columns={columns} data={paged} />
       )}
       {/* 페이지네이션 */}
       {total > 0 && (
@@ -409,7 +422,10 @@ export default function ProductManagement() {
                   min={0}
                 />
                 {/* 카테고리 */}
-                <label className="font-semibold text-sm" htmlFor="modal-category">
+                <label
+                  className="font-semibold text-sm"
+                  htmlFor="modal-category"
+                >
                   카테고리
                 </label>
                 <select

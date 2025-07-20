@@ -9,10 +9,15 @@ import type {
 const isBrowser = typeof window !== 'undefined';
 
 // API 클라이언트 인스턴스 생성
-export const apiClient = new Api({
-  baseURL: '', // Next.js 프록시를 통해 요청 (상대 경로 사용)
+const apiClientInstance = new Api({
+  baseURL: '', // 명시적으로 빈 문자열로 설정
   withCredentials: true, // 쿠키 기반 인증을 위해 필요
 });
+
+// baseURL을 강제로 빈 문자열로 설정
+apiClientInstance.instance.defaults.baseURL = '';
+
+export const apiClient = apiClientInstance;
 
 // 초기 설정 로깅
 console.log('🔧 API 클라이언트 설정:', {
@@ -108,10 +113,11 @@ apiClient.instance.interceptors.response.use(
 
       if (!isRefreshing) {
         isRefreshing = true;
-        refreshPromise = apiClient.api.reissue()
+        refreshPromise = apiClient.api
+          .reissue()
           .then(() => {
             // accessToken이 localStorage에 저장될 때까지 기다림 (최대 1초)
-            return new Promise<void>((resolve) => {
+            return new Promise<void>(resolve => {
               const start = Date.now();
               const check = () => {
                 const token = localStorage.getItem('accessToken');
@@ -160,7 +166,8 @@ apiClient.instance.interceptors.response.use(
               originalRequest.headers['Authorization'] = `Bearer ${token}`;
             }
           }
-          apiClient.instance.request(originalRequest)
+          apiClient.instance
+            .request(originalRequest)
             .then(resolve)
             .catch(reject);
         });

@@ -290,23 +290,6 @@ export interface PageResponseDtoUserResponse {
   isLast?: boolean;
 }
 
-export interface SalesStatisticsResponseDto {
-  /** @format date */
-  date?: string;
-  /** @format int64 */
-  totalSalesAmount?: number;
-}
-
-export interface ProductSalesStatisticsResponseDto {
-  /** @format int32 */
-  productId?: number;
-  productName?: string;
-  /** @format int64 */
-  totalQuantitySold?: number;
-  /** @format int64 */
-  totalSalesAmount?: number;
-}
-
 export interface PageResponseDtoDeliveryResponseDto {
   content?: DeliveryResponseDto[];
   /** @format int32 */
@@ -1298,47 +1281,6 @@ export class Api<
         path: `/api/v1/admin/users`,
         method: "GET",
         query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description 지정된 기간 동안의 일별 또는 월별 총 판매액 통계를 조회합니다. (주의: 대량 데이터 시 비효율적)
-     *
-     * @tags admin-controller
-     * @name GetSalesStatistics
-     * @summary 관리자 - 일별/월별 판매액 통계
-     * @request GET:/api/v1/admin/statistics/sales
-     */
-    getSalesStatistics: (
-      query: {
-        /** @format date */
-        startDate: string;
-        /** @format date */
-        endDate: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<SalesStatisticsResponseDto[], any>({
-        path: `/api/v1/admin/statistics/sales`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * @description 상품별 총 판매량 및 총 판매액 통계를 조회합니다. (주의: N+1 쿼리 발생 가능)
-     *
-     * @tags admin-controller
-     * @name GetProductSalesStatistics
-     * @summary 관리자 - 상품별 판매량 통계
-     * @request GET:/api/v1/admin/statistics/products
-     */
-    getProductSalesStatistics: (params: RequestParams = {}) =>
-      this.request<ProductSalesStatisticsResponseDto[], any>({
-        path: `/api/v1/admin/statistics/products`,
-        method: "GET",
         format: "json",
         ...params,
       }),

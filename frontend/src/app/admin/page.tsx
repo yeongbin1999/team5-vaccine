@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { useAdminAuthStore } from '../../features/auth/adminAuthStore';
 import ProductManagement from '@/components/admin/ProductManagement';
@@ -11,7 +11,6 @@ export default function AdminPage() {
   const isAuthenticated = useAdminAuthStore(state => state.isAuthenticated);
   const login = useAdminAuthStore(state => state.login);
   const logout = useAdminAuthStore(state => state.logout);
-  const checkAuth = useAdminAuthStore(state => state.checkAuth);
   const [selectedMenu, setSelectedMenu] = useState('main');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -130,20 +129,17 @@ export default function AdminPage() {
           <div
             className="bg-white bg-opacity-90 rounded-xl shadow-lg w-full max-w-4xl transition-all duration-300"
             style={{
-              height: (!isAuthenticated || selectedMenu === 'main') ? 0 : undefined,
-              padding: (!isAuthenticated || selectedMenu === 'main') ? 0 : '2rem',
+              height:
+                !isAuthenticated || selectedMenu === 'main' ? 0 : undefined,
+              padding: !isAuthenticated || selectedMenu === 'main' ? 0 : '2rem',
               overflow: 'hidden',
             }}
           >
             {isAuthenticated && selectedMenu === 'product' && (
               <ProductManagement />
             )}
-            {isAuthenticated && selectedMenu === 'order' && (
-              <OrderManagement />
-            )}
-            {isAuthenticated && selectedMenu === 'user' && (
-              <UserManagement />
-            )}
+            {isAuthenticated && selectedMenu === 'order' && <OrderManagement />}
+            {isAuthenticated && selectedMenu === 'user' && <UserManagement />}
             {isAuthenticated && selectedMenu === 'category' && (
               <CategoryManagement />
             )}

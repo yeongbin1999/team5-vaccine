@@ -19,9 +19,13 @@ export type ProductApiLike = {
   updatedAt?: string;
   category_id?: number;
   categoryId?: number;
+  category?: {
+    id?: number;
+    name?: string;
+  };
 };
 
-export function mapToProduct(item: any): ProductWithCategoryName {
+export function mapToProduct(item: ProductApiLike): ProductWithCategoryName {
   return {
     id: item.id ?? 0,
     name: item.name ?? '',
@@ -46,11 +50,13 @@ export async function fetchProducts(): Promise<ProductWithCategoryName[]> {
 
 export async function fetchCategories(): Promise<Category[]> {
   const res = await apiClient.api.getAllCategories();
-  return (res.data || []).map((item: any) => ({
-    id: item.id,
-    name: item.name,
-    parent_id: item.parentId,
-  }));
+  return (res.data || []).map(
+    (item: { id?: number; name?: string; parentId?: number }) => ({
+      id: item.id ?? 0,
+      name: item.name ?? '',
+      parent_id: item.parentId,
+    })
+  );
 }
 
 export async function deleteProduct(id: number): Promise<void> {

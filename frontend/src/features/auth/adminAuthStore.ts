@@ -4,7 +4,6 @@ import { apiClient } from '@/lib/backend/apiV1/client';
 const typedApiClient = apiClient as typeof apiClient & {
   api: import('@/lib/backend/apiV1/api').Api<unknown>['api'];
 };
-import { Api } from '@/lib/backend/apiV1/api';
 import { jwtDecode } from 'jwt-decode';
 
 interface JwtPayload {
@@ -48,7 +47,7 @@ export const useAdminAuthStore = create<AdminAuthStore>(set => ({
       }
       set({ isAuthenticated: false, isAuthChecked: true, user: null });
       return false;
-    } catch (e) {
+    } catch {
       set({ isAuthenticated: false, isAuthChecked: true, user: null });
       return false;
     }
@@ -73,7 +72,7 @@ export const useAdminAuthStore = create<AdminAuthStore>(set => ({
           localStorage.removeItem('accessToken');
           set({ isAuthenticated: false, isAuthChecked: true, user: null });
         }
-      } catch (e) {
+      } catch {
         localStorage.removeItem('accessToken');
         set({ isAuthenticated: false, isAuthChecked: true, user: null });
       }

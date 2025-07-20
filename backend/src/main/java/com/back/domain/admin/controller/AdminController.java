@@ -1,8 +1,6 @@
 package com.back.domain.admin.controller;
 
 import com.back.domain.admin.dto.PageResponseDto;
-import com.back.domain.admin.dto.ProductSalesStatisticsResponseDto;
-import com.back.domain.admin.dto.SalesStatisticsResponseDto;
 import com.back.domain.admin.service.AdminService;
 import com.back.domain.user.dto.UpdateUserRequest;
 import com.back.domain.user.dto.UserResponse;
@@ -17,9 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -71,36 +67,6 @@ public class AdminController {
             @RequestBody @Valid UpdateUserRequest request) {
         UserResponse updatedUser = adminService.updateUser(userId, request);
         return ResponseEntity.ok(updatedUser);
-    }
-
-    /**
-     * 관리자 - 일별/월별 판매액 통계를 조회합니다.
-     *
-     * @param startDate 통계 시작일
-     * @param endDate 통계 종료일
-     * @return 일별 판매액 통계 목록 응답
-     */
-    @GetMapping("/statistics/sales")
-    @Operation(summary = "관리자 - 일별/월별 판매액 통계",
-            description = "지정된 기간 동안의 일별 또는 월별 총 판매액 통계를 조회합니다. (주의: 대량 데이터 시 비효율적)")
-    public ResponseEntity<List<SalesStatisticsResponseDto>> getSalesStatistics(
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate) {
-        List<SalesStatisticsResponseDto> statistics = adminService.getDailySalesStatistics(startDate, endDate);
-        return ResponseEntity.ok(statistics);
-    }
-
-    /**
-     * 관리자 - 상품별 판매량 통계를 조회합니다.
-     *
-     * @return 상품별 판매량 통계 목록 응답
-     */
-    @GetMapping("/statistics/products")
-    @Operation(summary = "관리자 - 상품별 판매량 통계",
-            description = "상품별 총 판매량 및 총 판매액 통계를 조회합니다. (주의: N+1 쿼리 발생 가능)")
-    public ResponseEntity<List<ProductSalesStatisticsResponseDto>> getProductSalesStatistics() {
-        List<ProductSalesStatisticsResponseDto> statistics = adminService.getProductSalesStatistics();
-        return ResponseEntity.ok(statistics);
     }
 
     /**

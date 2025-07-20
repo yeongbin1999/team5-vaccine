@@ -38,7 +38,6 @@ export function LoginForm() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuthStore();
   const hasHydrated = useCartHydrated();
   const modalRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
