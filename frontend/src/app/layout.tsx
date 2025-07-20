@@ -5,7 +5,8 @@ import { QueryProvider } from '@/components/providers/QueryProvider';
 import { AuthInitializer } from '@/components/auth/AuthInitializer';
 import { Toaster } from '@/components/ui/sonner';
 import AppShell from '@/components/layout/AppShell';
-import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { ClientOnlyAuthInit } from '@/components/auth/ClientOnlyAuthInit';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
 const geistMono = Geist_Mono({
@@ -24,10 +25,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname =
-    typeof window !== 'undefined' ? window.location.pathname : '';
-  const isAdmin = pathname.startsWith('/admin');
-
   return (
     <html lang="ko">
       <body
@@ -52,8 +49,7 @@ export default function RootLayout({
           }}
         />
         <QueryProvider>
-          {/* admin 경로가 아닐 때만 AuthInitializer 렌더 */}
-          {!isAdmin && <AuthInitializer />}
+          <ClientOnlyAuthInit />
           <AppShell>{children}</AppShell>
         </QueryProvider>
       </body>
