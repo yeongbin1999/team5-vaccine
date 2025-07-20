@@ -10,8 +10,18 @@ import { getOrderDetail } from './api';
 import { useSearchParams } from 'next/navigation';
 // import { toast } from 'sonner';
 
-function OrderDetailModal({ orderId, onClose }: { orderId: number; onClose: () => void }) {
-  const { data: detail, isLoading, error } = useQuery({
+function OrderDetailModal({
+  orderId,
+  onClose,
+}: {
+  orderId: number;
+  onClose: () => void;
+}) {
+  const {
+    data: detail,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['orderDetail', orderId],
     queryFn: () => getOrderDetail(orderId),
     enabled: !!orderId,
@@ -21,18 +31,32 @@ function OrderDetailModal({ orderId, onClose }: { orderId: number; onClose: () =
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
       <div className="bg-white rounded-xl shadow-lg p-8 max-w-lg w-full relative">
-        <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700" onClick={onClose}>&times;</button>
+        <button
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
+          onClick={onClose}
+        >
+          &times;
+        </button>
         {isLoading ? (
           <div className="text-center py-12">상세 정보를 불러오는 중...</div>
         ) : error ? (
-          <div className="text-center py-12 text-red-400">상세 정보를 불러오지 못했습니다.</div>
+          <div className="text-center py-12 text-red-400">
+            상세 정보를 불러오지 못했습니다.
+          </div>
         ) : detail ? (
           <div>
             <h2 className="text-2xl font-bold mb-2">주문 상세</h2>
             <div className="mb-2 text-gray-700">주문번호: {detail.orderId}</div>
-            <div className="mb-2 text-gray-700">주문일시: {detail.orderDate ? new Date(detail.orderDate).toLocaleString('ko-KR') : '-'}</div>
+            <div className="mb-2 text-gray-700">
+              주문일시:{' '}
+              {detail.orderDate
+                ? new Date(detail.orderDate).toLocaleString('ko-KR')
+                : '-'}
+            </div>
             <div className="mb-2 text-gray-700">상태: {detail.status}</div>
-            <div className="mb-2 text-gray-700">총액: {detail.totalPrice?.toLocaleString()}원</div>
+            <div className="mb-2 text-gray-700">
+              총액: {detail.totalPrice?.toLocaleString()}원
+            </div>
             <div className="mb-2 text-gray-700">배송지: {detail.address}</div>
             <div className="mb-2 text-gray-700">주문자: {detail.username}</div>
             <div className="mt-4">
@@ -41,7 +65,9 @@ function OrderDetailModal({ orderId, onClose }: { orderId: number; onClose: () =
                 {detail.items?.map((item, idx) => (
                   <li key={idx} className="py-2 flex justify-between">
                     <span>{item.productName}</span>
-                    <span>{item.quantity}개 × {item.unitPrice?.toLocaleString()}원</span>
+                    <span>
+                      {item.quantity}개 × {item.unitPrice?.toLocaleString()}원
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -183,7 +209,11 @@ export default function OrdersPage() {
         ) : (
           orders
             .slice()
-            .sort((a, b) => new Date(b.orderDate || 0).getTime() - new Date(a.orderDate || 0).getTime())
+            .sort(
+              (a, b) =>
+                new Date(b.orderDate || 0).getTime() -
+                new Date(a.orderDate || 0).getTime()
+            )
             .map(order => (
               <OrderCard
                 key={order.orderId ?? 0}
@@ -194,7 +224,10 @@ export default function OrdersPage() {
         )}
       </div>
       {selectedOrderId && (
-        <OrderDetailModal orderId={selectedOrderId} onClose={() => setSelectedOrderId(null)} />
+        <OrderDetailModal
+          orderId={selectedOrderId}
+          onClose={() => setSelectedOrderId(null)}
+        />
       )}
     </div>
   );

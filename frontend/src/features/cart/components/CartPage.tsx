@@ -121,7 +121,7 @@ export function CartPage() {
       shippingAddress: string;
       items: Array<{ productId: number; quantity: number; unitPrice: number }>;
     }) => createOrder(orderData),
-    onSuccess: async (orderDetail) => {
+    onSuccess: async orderDetail => {
       // 주문 생성 성공 후 장바구니 비우기
       try {
         if (isAuthenticated) {
@@ -134,7 +134,9 @@ export function CartPage() {
         // 상품 목록/상세 쿼리도 invalidate (재고 최신화)
         queryClient.invalidateQueries({ queryKey: ['products'] });
         items.forEach(item => {
-          queryClient.invalidateQueries({ queryKey: ['product', item.productId] });
+          queryClient.invalidateQueries({
+            queryKey: ['product', item.productId],
+          });
         });
         toast.success('주문이 성공적으로 생성되었습니다!');
         // 주문 상세 자동 오픈: 주문 ID를 쿼리로 전달
