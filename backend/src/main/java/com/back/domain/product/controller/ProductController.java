@@ -103,41 +103,5 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
     
-    // 재고 부족 상품 조회 API (관리자 전용)
-    @GetMapping("/api/v1/admin/products/low-stock")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<ProductResponseDto>> getLowStockProducts(
-            @RequestParam(defaultValue = "10") Integer threshold
-    ) {
-        List<ProductResponseDto> products = productService.getLowStockProducts(threshold);
-        return ResponseEntity.ok(products);
-    }
 
-    //상품 관리 API (관리자 전용)
-    // 상품 생성 API
-    @PostMapping("/api/v1/admin/products")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponseDto> createProduct(@Valid @RequestBody ProductRequestDto requestDto) {
-        ProductResponseDto createdProduct = productService.createProduct(requestDto);
-        return new ResponseEntity<>(createdProduct, HttpStatus.CREATED); // 201 Created 응답
-    }
-
-    // 특정 ID의 상품 수정 API
-    @PutMapping("/api/v1/admin/products/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponseDto> updateProduct(
-            @PathVariable Integer id, 
-            @Valid @RequestBody ProductRequestDto requestDto
-    ) {
-        ProductResponseDto updatedProduct = productService.updateProduct(id, requestDto);
-        return ResponseEntity.ok(updatedProduct); // 200 OK 응답
-    }
-
-    // 특정 ID의 상품 삭제 API
-    @DeleteMapping("/api/v1/admin/products/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
-        productService.deleteProduct(id);
-        return ResponseEntity.noContent().build(); // 204 No Content 응답
-    }
 }
