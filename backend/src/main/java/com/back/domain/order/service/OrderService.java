@@ -13,6 +13,7 @@ import com.back.domain.order.repository.OrderItemRepository;
 import com.back.domain.order.repository.OrderRepository;
 import com.back.domain.product.entity.Product;
 import com.back.domain.product.repository.ProductRepository;
+import com.back.domain.user.entity.Role;
 import com.back.domain.user.entity.User;
 import com.back.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -86,18 +87,28 @@ public class OrderService {
                 .toList();
     }
 
-    // 3. 주문 상세 조회 (보안 적용)
+    // 3. 주문 상세 조회 (관리자는 모두 가능, 일반 사용자는 본인 주문만)
     public OrderDetailDTO getOrderDetail(int orderId, int userId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문 없음"));
 
-        if (order.getUser().getId() != userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+
+        // 관리자라면 모든 주문 조회 가능
+        if (!isAdmin(user) && order.getUser().getId() != userId) {
             throw new SecurityException("본인의 주문만 조회할 수 있습니다.");
         }
 
         List<OrderItem> items = orderItemRepository.findByOrder(order);
         return OrderDetailDTO.from(order, items);
     }
+
+    private boolean isAdmin(User user) {
+        // 예: User 엔티티에 getRole()이 있다고 가정
+        return user.getRole() == Role.ADMIN;
+    }
+
 
     // 4. 관리자 - 전체 주문 목록
     public List<OrderListDTO> getAllOrders() {

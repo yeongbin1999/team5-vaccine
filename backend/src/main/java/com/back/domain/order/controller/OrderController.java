@@ -22,6 +22,7 @@ public class OrderController {
 
     // 사용자 - 주문 생성
     @PostMapping("/api/v1/orders")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<OrderDetailDTO> createOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody OrderRequestDTO request

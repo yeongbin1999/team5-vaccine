@@ -146,8 +146,9 @@ export default function OrderManagement() {
     setStatusUpdateError(null);
     try {
       // 관리자용 상세조회 API 직접 호출
+      orderId = 1;
       const res = await apiClient.request({
-        path: `/api/v1/admin/orders/${orderId}`,
+        path: `/api/v1/orders/${orderId}`,
         method: 'GET',
         format: 'json',
       });

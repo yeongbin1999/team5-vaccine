@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/products/**").permitAll()
                         .requestMatchers("/api/v1/categories/**").permitAll()
                         .requestMatchers("/api/v1/carts/**").hasRole("USER")
-                        .requestMatchers("/api/v1/orders/**").hasRole("USER")
+//                        .requestMatchers("/api/v1/orders/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // JWT 필터 등록
