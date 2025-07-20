@@ -285,12 +285,18 @@ export async function syncCartOnLogin() {
 
   // 서버 장바구니 먼저
   for (const item of serverCart) {
-    quantityMap.set(item.productId, (quantityMap.get(item.productId) || 0) + item.quantity);
+    quantityMap.set(
+      item.productId,
+      (quantityMap.get(item.productId) || 0) + item.quantity
+    );
     infoMap.set(item.productId, item); // 서버 정보 우선
   }
   // 게스트 장바구니
   for (const item of guestCart) {
-    quantityMap.set(item.productId, (quantityMap.get(item.productId) || 0) + item.quantity);
+    quantityMap.set(
+      item.productId,
+      (quantityMap.get(item.productId) || 0) + item.quantity
+    );
     if (!infoMap.has(item.productId)) {
       infoMap.set(item.productId, item); // 서버에 없으면 게스트 정보 사용
     }
@@ -311,7 +317,10 @@ export async function syncCartOnLogin() {
       if (!serverItem) {
         await addToCart({ productId: item.productId, quantity: item.quantity });
       } else if (serverItem.quantity !== item.quantity) {
-        await apiUpdateCartItem({ itemId: serverItem.id, quantity: item.quantity });
+        await apiUpdateCartItem({
+          itemId: serverItem.id,
+          quantity: item.quantity,
+        });
       }
     }
   }
@@ -328,4 +337,3 @@ export async function syncCartOnLogin() {
   // 8. sessionStorage 비우기
   sessionStorage.removeItem('cart-storage');
 }
-
