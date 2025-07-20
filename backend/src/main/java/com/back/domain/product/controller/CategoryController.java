@@ -22,6 +22,7 @@ public class CategoryController {
     // 카테고리 조회 API (전체 사용자 접근 가능 - 인증 불필요)
     // 특정 카테고리 조회
     @GetMapping("/api/v1/categories/{id}")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<CategoryResponseDto> getCategoryById(@PathVariable Integer id) {
         CategoryResponseDto category = categoryService.getCategoryById(id);
         return ResponseEntity.ok(category);
@@ -29,6 +30,7 @@ public class CategoryController {
 
     // 전체 카테고리 조회
     @GetMapping("/api/v1/categories")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<List<CategoryResponseDto>> getAllCategories() {
         List<CategoryResponseDto> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
@@ -36,6 +38,7 @@ public class CategoryController {
 
     // 루트 카테고리 조회 (부모 카테고리가 없는 카테고리들)
     @GetMapping("/api/v1/categories/roots")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<List<CategoryResponseDto>> getRootCategories() {
         List<CategoryResponseDto> rootCategories = categoryService.getRootCategories();
         return ResponseEntity.ok(rootCategories);
@@ -49,8 +52,10 @@ public class CategoryController {
             @Valid @RequestBody CategoryRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        // 카테고리 생성자 정보 로깅 (필요시)
-        System.out.println("Admin user: " + customUserDetails.getName() + " (" + customUserDetails.getEmail() + ") created a new category: " + requestDto.name());
+        // 카테고리 생성자 정보 로깅 (필요시) - 테스트 환경에서는 customUserDetails가 null일 수 있음
+        if (customUserDetails != null) {
+            System.out.println("Admin user: " + customUserDetails.getName() + " (" + customUserDetails.getEmail() + ") created a new category: " + requestDto.name());
+        }
         
         CategoryResponseDto createdCategory = categoryService.createCategory(requestDto);
         return new ResponseEntity<>(createdCategory, HttpStatus.CREATED);
@@ -64,8 +69,10 @@ public class CategoryController {
             @Valid @RequestBody CategoryRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        // 카테고리 수정자 정보 로깅 (필요시)
-        System.out.println("Admin user: " + customUserDetails.getName() + " (" + customUserDetails.getEmail() + ") updated category ID: " + id);
+        // 카테고리 수정자 정보 로깅 (필요시) - 테스트 환경에서는 customUserDetails가 null일 수 있음
+        if (customUserDetails != null) {
+            System.out.println("Admin user: " + customUserDetails.getName() + " (" + customUserDetails.getEmail() + ") updated category ID: " + id);
+        }
         
         CategoryResponseDto updatedCategory = categoryService.updateCategory(id, requestDto);
         return ResponseEntity.ok(updatedCategory);
@@ -78,8 +85,10 @@ public class CategoryController {
             @PathVariable Integer id,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ) {
-        // 카테고리 삭제자 정보 로깅 (필요시)
-        System.out.println("Admin user: " + customUserDetails.getName() + " (" + customUserDetails.getEmail() + ") deleted category ID: " + id);
+        // 카테고리 삭제자 정보 로깅 (필요시) - 테스트 환경에서는 customUserDetails가 null일 수 있음
+        if (customUserDetails != null) {
+            System.out.println("Admin user: " + customUserDetails.getName() + " (" + customUserDetails.getEmail() + ") deleted category ID: " + id);
+        }
         
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
