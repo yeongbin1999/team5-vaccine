@@ -16,7 +16,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,9 +34,7 @@ public class DeliveryController {
      * @return 생성된 배송 정보 DTO
      */
     @PostMapping
-    @Operation(summary = "관리자 - 새로운 배송 정보 생성",
-            description = "새로운 배송 정보를 생성합니다. (ADMIN 권한 필요)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "관리자 - 새로운 배송 정보 생성", description = "새로운 배송 정보를 생성합니다. (ADMIN 권한 필요)")
     public ResponseEntity<DeliveryResponseDto> createDelivery(@RequestBody @Valid DeliveryRequestDto request) {
         DeliveryResponseDto response = deliveryService.createDelivery(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -50,9 +47,7 @@ public class DeliveryController {
      * @return 배송 정보 목록과 페이지 정보를 담은 응답
      */
     @GetMapping
-    @Operation(summary = "관리자 - 모든 배송 정보 조회 (페이지네이션 가능)",
-            description = "모든 배송 정보 목록을 조회합니다. (ADMIN 권한 필요)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "관리자 - 모든 배송 정보 조회 (페이지네이션 가능)", description = "모든 배송 정보 목록을 조회합니다. (ADMIN 권한 필요)")
     public ResponseEntity<PageResponseDto<DeliveryResponseDto>> getAllDeliveries(
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         Page<DeliveryResponseDto> deliveriesPage = deliveryService.getAllDeliveries(pageable);
@@ -74,9 +69,7 @@ public class DeliveryController {
      * @return 조회된 배송 정보 DTO
      */
     @GetMapping("/{deliveryId}")
-    @Operation(summary = "관리자 - 특정 배송 정보 조회",
-            description = "특정 배송 ID를 통해 상세 정보를 조회합니다. (ADMIN 권한 필요)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "관리자 - 특정 배송 정보 조회", description = "특정 배송 ID를 통해 상세 정보를 조회합니다. (ADMIN 권한 필요)")
     public ResponseEntity<DeliveryResponseDto> getDeliveryById(
             @PathVariable @Positive(message = "배송 ID는 양수여야 합니다.") Integer deliveryId) {
         DeliveryResponseDto response = deliveryService.getDeliveryById(deliveryId);
@@ -91,9 +84,7 @@ public class DeliveryController {
      * @return 업데이트된 배송 정보 DTO
      */
     @PutMapping("/{deliveryId}")
-    @Operation(summary = "관리자 - 특정 배송 정보 업데이트",
-            description = "특정 배송 ID의 정보를 업데이트합니다. (ADMIN 권한 필요)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "관리자 - 특정 배송 정보 업데이트", description = "특정 배송 ID의 정보를 업데이트합니다. (ADMIN 권한 필요)")
     public ResponseEntity<DeliveryResponseDto> updateDelivery(
             @PathVariable @Positive(message = "배송 ID는 양수여야 합니다.") Integer deliveryId,
             @RequestBody @Valid DeliveryRequestDto request) {
@@ -110,9 +101,7 @@ public class DeliveryController {
      * @return 업데이트된 배송 정보 DTO
      */
     @PatchMapping("/{deliveryId}/status")
-    @Operation(summary = "관리자 - 특정 배송 상태 업데이트",
-            description = "특정 배송 ID의 상태를 업데이트합니다. (ADMIN 권한 필요)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "관리자 - 특정 배송 상태 업데이트", description = "특정 배송 ID의 상태를 업데이트합니다. (ADMIN 권한 필요)")
     public ResponseEntity<DeliveryResponseDto> updateDeliveryStatus(
             @PathVariable @Positive(message = "배송 ID는 양수여야 합니다.") Integer deliveryId,
             @RequestParam @NotNull(message = "배송 상태는 필수입니다.") DeliveryStatus status) {
@@ -127,9 +116,7 @@ public class DeliveryController {
      * @return 응답 없음 (HTTP 204 No Content)
      */
     @DeleteMapping("/{deliveryId}")
-    @Operation(summary = "관리자 - 특정 배송 정보 삭제",
-            description = "특정 배송 ID의 정보를 삭제합니다. (ADMIN 권한 필요)")
-    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "관리자 - 특정 배송 정보 삭제", description = "특정 배송 ID의 정보를 삭제합니다. (ADMIN 권한 필요)")
     public ResponseEntity<Void> deleteDelivery(
             @PathVariable @Positive(message = "배송 ID는 양수여야 합니다.") Integer deliveryId) {
         deliveryService.deleteDelivery(deliveryId);
