@@ -44,9 +44,9 @@ export function DataTable<TData, TValue>({
       <table className="w-full">
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
-            <tr key={headerGroup.id}>
+            <tr key={headerGroup.id} className="border-b-2 border-gray-300 bg-gray-50">
               {headerGroup.headers.map(header => (
-                <th key={header.id} className="px-4 py-2 text-left">
+                <th key={header.id} className="px-4 py-2 text-center border-r border-gray-200 last:border-r-0">
                   {header.isPlaceholder
                     ? null
                     : flexRender(header.column.columnDef.header, header.getContext())}
@@ -57,9 +57,9 @@ export function DataTable<TData, TValue>({
         </thead>
         <tbody>
           {table.getRowModel().rows.map(row => (
-            <tr key={row.id}>
+            <tr key={row.id} className="border-b border-gray-200">
               {row.getVisibleCells().map(cell => (
-                <td key={cell.id} className="px-4 py-2">
+                <td key={cell.id} className="px-4 py-2 text-center border-r border-gray-200 last:border-r-0">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

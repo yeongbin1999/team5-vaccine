@@ -31,7 +31,7 @@ export interface UserResponse {
   email?: string;
   phone?: string;
   address?: string;
-  role?: 'USER' | 'ADMIN';
+  role?: "USER" | "ADMIN";
 }
 
 export interface ProductRequestDto {
@@ -102,7 +102,7 @@ export interface DeliveryRequestDto {
    * @maxLength 50
    */
   company?: string;
-  status?: '배송준비중' | '배송중' | '배송완료';
+  status?: "배송준비중" | "배송중" | "배송완료";
 }
 
 export interface DeliveryResponseDto {
@@ -114,7 +114,7 @@ export interface DeliveryResponseDto {
   /** @format date-time */
   completeDate?: string;
   trackingNumber?: string;
-  status?: '배송준비중' | '배송중' | '배송완료';
+  status?: "배송준비중" | "배송중" | "배송완료";
   company?: string;
 }
 
@@ -175,7 +175,7 @@ export interface OrderDetailDTO {
   address?: string;
   /** @format int32 */
   totalPrice?: number;
-  status?: '배송준비중' | '배송중' | '배송완료' | '취소';
+  status?: "배송준비중" | "배송중" | "배송완료" | "취소";
   /** @format date-time */
   orderDate?: string;
   username?: string;
@@ -227,7 +227,7 @@ export interface ChangePasswordRequest {
 export interface OrderStatusUpdateDTO {
   /** @format int32 */
   orderId?: number;
-  newStatus?: '배송준비중' | '배송중' | '배송완료' | '취소';
+  newStatus?: "배송준비중" | "배송중" | "배송완료" | "취소";
 }
 
 export interface OrderListDTO {
@@ -238,7 +238,7 @@ export interface OrderListDTO {
   orderDate?: string;
   /** @format int32 */
   totalPrice?: number;
-  status?: '배송준비중' | '배송중' | '배송완료' | '취소';
+  status?: "배송준비중" | "배송중" | "배송완료" | "취소";
 }
 
 export interface CartDto {
@@ -326,13 +326,13 @@ import type {
   AxiosResponse,
   HeadersDefaults,
   ResponseType,
-} from 'axios';
-import axios from 'axios';
+} from "axios";
+import axios from "axios";
 
 export type QueryParamsType = Record<string | number, any>;
 
 export interface FullRequestParams
-  extends Omit<AxiosRequestConfig, 'data' | 'params' | 'url' | 'responseType'> {
+  extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -349,30 +349,30 @@ export interface FullRequestParams
 
 export type RequestParams = Omit<
   FullRequestParams,
-  'body' | 'method' | 'query' | 'path'
+  "body" | "method" | "query" | "path"
 >;
 
 export interface ApiConfig<SecurityDataType = unknown>
-  extends Omit<AxiosRequestConfig, 'data' | 'cancelToken'> {
+  extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
   securityWorker?: (
-    securityData: SecurityDataType | null
+    securityData: SecurityDataType | null,
   ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
   secure?: boolean;
   format?: ResponseType;
 }
 
 export enum ContentType {
-  Json = 'application/json',
-  JsonApi = 'application/vnd.api+json',
-  FormData = 'multipart/form-data',
-  UrlEncoded = 'application/x-www-form-urlencoded',
-  Text = 'text/plain',
+  Json = "application/json",
+  JsonApi = "application/vnd.api+json",
+  FormData = "multipart/form-data",
+  UrlEncoded = "application/x-www-form-urlencoded",
+  Text = "text/plain",
 }
 
 export class HttpClient<SecurityDataType = unknown> {
   public instance: AxiosInstance;
   private securityData: SecurityDataType | null = null;
-  private securityWorker?: ApiConfig<SecurityDataType>['securityWorker'];
+  private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
   private secure?: boolean;
   private format?: ResponseType;
 
@@ -384,7 +384,7 @@ export class HttpClient<SecurityDataType = unknown> {
   }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
-      baseURL: axiosConfig.baseURL || 'http://localhost:8080',
+      baseURL: axiosConfig.baseURL || "http://localhost:8080",
     });
     this.secure = secure;
     this.format = format;
@@ -397,7 +397,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected mergeRequestParams(
     params1: AxiosRequestConfig,
-    params2?: AxiosRequestConfig
+    params2?: AxiosRequestConfig,
   ): AxiosRequestConfig {
     const method = params1.method || (params2 && params2.method);
 
@@ -418,7 +418,7 @@ export class HttpClient<SecurityDataType = unknown> {
   }
 
   protected stringifyFormItem(formItem: unknown) {
-    if (typeof formItem === 'object' && formItem !== null) {
+    if (typeof formItem === "object" && formItem !== null) {
       return JSON.stringify(formItem);
     } else {
       return `${formItem}`;
@@ -438,7 +438,7 @@ export class HttpClient<SecurityDataType = unknown> {
         const isFileType = formItem instanceof Blob || formItem instanceof File;
         formData.append(
           key,
-          isFileType ? formItem : this.stringifyFormItem(formItem)
+          isFileType ? formItem : this.stringifyFormItem(formItem),
         );
       }
 
@@ -456,7 +456,7 @@ export class HttpClient<SecurityDataType = unknown> {
     ...params
   }: FullRequestParams): Promise<AxiosResponse<T>> => {
     const secureParams =
-      ((typeof secure === 'boolean' ? secure : this.secure) &&
+      ((typeof secure === "boolean" ? secure : this.secure) &&
         this.securityWorker &&
         (await this.securityWorker(this.securityData))) ||
       {};
@@ -467,7 +467,7 @@ export class HttpClient<SecurityDataType = unknown> {
       type === ContentType.FormData &&
       body &&
       body !== null &&
-      typeof body === 'object'
+      typeof body === "object"
     ) {
       body = this.createFormData(body as Record<string, unknown>);
     }
@@ -476,7 +476,7 @@ export class HttpClient<SecurityDataType = unknown> {
       type === ContentType.Text &&
       body &&
       body !== null &&
-      typeof body !== 'string'
+      typeof body !== "string"
     ) {
       body = JSON.stringify(body);
     }
@@ -485,7 +485,7 @@ export class HttpClient<SecurityDataType = unknown> {
       ...requestParams,
       headers: {
         ...(requestParams.headers || {}),
-        ...(type ? { 'Content-Type': type } : {}),
+        ...(type ? { "Content-Type": type } : {}),
       },
       params: query,
       responseType: responseFormat,
@@ -517,11 +517,11 @@ export class Api<
     updateItemQuantity: (
       cartItemId: number,
       data: UpdateCartItemRequest,
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<void, any>({
         path: `/api/v1/carts/items/${cartItemId}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
         type: ContentType.Json,
         ...params,
@@ -538,7 +538,7 @@ export class Api<
     deleteItem: (cartItemId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/v1/carts/items/${cartItemId}`,
-        method: 'DELETE',
+        method: "DELETE",
         ...params,
       }),
 
@@ -553,8 +553,8 @@ export class Api<
     getUserById: (userId: number, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/v1/admin/users/${userId}`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -569,14 +569,14 @@ export class Api<
     updateUser: (
       userId: number,
       data: UpdateUserRequest,
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<UserResponse, any>({
         path: `/api/v1/admin/users/${userId}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -591,14 +591,14 @@ export class Api<
     updateProduct: (
       id: number,
       data: ProductRequestDto,
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<ProductResponseDto, any>({
         path: `/api/v1/admin/products/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -613,7 +613,7 @@ export class Api<
     deleteProduct: (id: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/v1/admin/products/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
         ...params,
       }),
 
@@ -628,8 +628,8 @@ export class Api<
     getDeliveryById: (deliveryId: number, params: RequestParams = {}) =>
       this.request<DeliveryResponseDto, any>({
         path: `/api/v1/admin/deliveries/${deliveryId}`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -644,14 +644,14 @@ export class Api<
     updateDelivery: (
       deliveryId: number,
       data: DeliveryRequestDto,
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<DeliveryResponseDto, any>({
         path: `/api/v1/admin/deliveries/${deliveryId}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -666,7 +666,7 @@ export class Api<
     deleteDelivery: (deliveryId: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/v1/admin/deliveries/${deliveryId}`,
-        method: 'DELETE',
+        method: "DELETE",
         ...params,
       }),
 
@@ -680,14 +680,14 @@ export class Api<
     updateCategory: (
       id: number,
       data: CategoryRequestDto,
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<CategoryResponseDto, any>({
         path: `/api/v1/admin/categories/${id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -701,7 +701,7 @@ export class Api<
     deleteCategory: (id: number, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/v1/admin/categories/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
         ...params,
       }),
 
@@ -729,13 +729,13 @@ export class Api<
         /** @default false */
         includeSubCategories?: boolean;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<ProductResponseDto[], any>({
         path: `/api/v1/products/search`,
-        method: 'GET',
+        method: "GET",
         query: query,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -750,10 +750,10 @@ export class Api<
     searchProducts: (data: ProductSearchDto, params: RequestParams = {}) =>
       this.request<ProductResponseDto[], any>({
         path: `/api/v1/products/search`,
-        method: 'POST',
+        method: "POST",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -767,8 +767,8 @@ export class Api<
     getMyOrders: (params: RequestParams = {}) =>
       this.request<OrderListDTO[], any>({
         path: `/api/v1/orders`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -782,10 +782,10 @@ export class Api<
     createOrder: (data: OrderRequestDTO, params: RequestParams = {}) =>
       this.request<OrderDetailDTO, any>({
         path: `/api/v1/orders`,
-        method: 'POST',
+        method: "POST",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -806,11 +806,11 @@ export class Api<
         userId: number;
       },
       data: AddCartItemRequest,
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<void, any>({
         path: `/api/v1/carts/items`,
-        method: 'POST',
+        method: "POST",
         query: query,
         body: data,
         type: ContentType.Json,
@@ -827,10 +827,10 @@ export class Api<
     signup: (data: SignupRequest, params: RequestParams = {}) =>
       this.request<string, any>({
         path: `/api/v1/auth/signup`,
-        method: 'POST',
+        method: "POST",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -844,7 +844,7 @@ export class Api<
     reissue: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/v1/auth/reissue`,
-        method: 'POST',
+        method: "POST",
         ...params,
       }),
 
@@ -858,7 +858,7 @@ export class Api<
     logout: (params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/v1/auth/logout`,
-        method: 'POST',
+        method: "POST",
         ...params,
       }),
 
@@ -872,7 +872,7 @@ export class Api<
     login: (data: LoginRequest, params: RequestParams = {}) =>
       this.request<void, any>({
         path: `/api/v1/auth/login`,
-        method: 'POST',
+        method: "POST",
         body: data,
         type: ContentType.Json,
         ...params,
@@ -888,10 +888,10 @@ export class Api<
     changePassword: (data: ChangePasswordRequest, params: RequestParams = {}) =>
       this.request<string, any>({
         path: `/api/v1/auth/change-password`,
-        method: 'POST',
+        method: "POST",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -906,10 +906,10 @@ export class Api<
     createProduct: (data: ProductRequestDto, params: RequestParams = {}) =>
       this.request<ProductResponseDto, any>({
         path: `/api/v1/admin/products`,
-        method: 'POST',
+        method: "POST",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -925,13 +925,13 @@ export class Api<
       query: {
         pageable: Pageable;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<PageResponseDtoDeliveryResponseDto, any>({
         path: `/api/v1/admin/deliveries`,
-        method: 'GET',
+        method: "GET",
         query: query,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -946,10 +946,10 @@ export class Api<
     createDelivery: (data: DeliveryRequestDto, params: RequestParams = {}) =>
       this.request<DeliveryResponseDto, any>({
         path: `/api/v1/admin/deliveries`,
-        method: 'POST',
+        method: "POST",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -963,10 +963,10 @@ export class Api<
     createCategory: (data: CategoryRequestDto, params: RequestParams = {}) =>
       this.request<CategoryResponseDto, any>({
         path: `/api/v1/admin/categories`,
-        method: 'POST',
+        method: "POST",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -980,8 +980,8 @@ export class Api<
     getMe: (params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/v1/users/me`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -995,10 +995,10 @@ export class Api<
     updateMe: (data: UpdateUserRequest, params: RequestParams = {}) =>
       this.request<UserResponse, any>({
         path: `/api/v1/users/me`,
-        method: 'PATCH',
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1007,19 +1007,19 @@ export class Api<
      *
      * @tags order-controller
      * @name UpdateOrderStatus
-     * @request PATCH:/api/v1/orders/admin/{orderId}/status
+     * @request PATCH:/api/v1/admin/orders/{orderId}/status
      */
     updateOrderStatus: (
       orderId: number,
       data: OrderStatusUpdateDTO,
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<OrderDetailDTO, any>({
-        path: `/api/v1/orders/admin/${orderId}/status`,
-        method: 'PATCH',
+        path: `/api/v1/admin/orders/${orderId}/status`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1034,15 +1034,15 @@ export class Api<
     updateDeliveryStatus: (
       deliveryId: number,
       query: {
-        status: '배송준비중' | '배송중' | '배송완료';
+        status: "배송준비중" | "배송중" | "배송완료";
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<DeliveryResponseDto, any>({
         path: `/api/v1/admin/deliveries/${deliveryId}/status`,
-        method: 'PATCH',
+        method: "PATCH",
         query: query,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1057,8 +1057,8 @@ export class Api<
     getAllProducts: (params: RequestParams = {}) =>
       this.request<ProductResponseDto[], any>({
         path: `/api/v1/products`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -1073,8 +1073,8 @@ export class Api<
     getProductById: (id: number, params: RequestParams = {}) =>
       this.request<ProductResponseDto, any>({
         path: `/api/v1/products/${id}`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -1090,13 +1090,13 @@ export class Api<
       query: {
         name: string;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<ProductResponseDto[], any>({
         path: `/api/v1/products/search/name`,
-        method: 'GET',
+        method: "GET",
         query: query,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1115,13 +1115,13 @@ export class Api<
         /** @format int32 */
         maxPrice: number;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<ProductResponseDto[], any>({
         path: `/api/v1/products/price-range`,
-        method: 'GET',
+        method: "GET",
         query: query,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1136,8 +1136,8 @@ export class Api<
     getOutOfStockProducts: (params: RequestParams = {}) =>
       this.request<ProductResponseDto[], any>({
         path: `/api/v1/products/out-of-stock`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -1155,13 +1155,13 @@ export class Api<
         /** @default false */
         includeSubCategories?: boolean;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<ProductResponseDto[], any>({
         path: `/api/v1/products/category/${categoryId}`,
-        method: 'GET',
+        method: "GET",
         query: query,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1175,23 +1175,8 @@ export class Api<
     getOrderDetail: (orderId: number, params: RequestParams = {}) =>
       this.request<OrderDetailDTO, any>({
         path: `/api/v1/orders/${orderId}`,
-        method: 'GET',
-        format: 'json',
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @tags order-controller
-     * @name GetAllOrders
-     * @request GET:/api/v1/orders/admin/all
-     */
-    getAllOrders: (params: RequestParams = {}) =>
-      this.request<OrderListDTO[], any>({
-        path: `/api/v1/orders/admin/all`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -1206,8 +1191,8 @@ export class Api<
     getAllCategories: (params: RequestParams = {}) =>
       this.request<CategoryResponseDto[], any>({
         path: `/api/v1/categories`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -1222,8 +1207,8 @@ export class Api<
     getCategoryById: (id: number, params: RequestParams = {}) =>
       this.request<CategoryResponseDto, any>({
         path: `/api/v1/categories/${id}`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -1238,8 +1223,8 @@ export class Api<
     getRootCategories: (params: RequestParams = {}) =>
       this.request<CategoryResponseDto[], any>({
         path: `/api/v1/categories/roots`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -1259,13 +1244,13 @@ export class Api<
          */
         userId: number;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<CartDto, any>({
         path: `/api/v1/carts`,
-        method: 'GET',
+        method: "GET",
         query: query,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1285,11 +1270,11 @@ export class Api<
          */
         userId: number;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<void, any>({
         path: `/api/v1/carts`,
-        method: 'DELETE',
+        method: "DELETE",
         query: query,
         ...params,
       }),
@@ -1307,13 +1292,13 @@ export class Api<
         pageable: Pageable;
         search?: string;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<PageResponseDtoUserResponse, any>({
         path: `/api/v1/admin/users`,
-        method: 'GET',
+        method: "GET",
         query: query,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1332,13 +1317,13 @@ export class Api<
         /** @format date */
         endDate: string;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<SalesStatisticsResponseDto[], any>({
         path: `/api/v1/admin/statistics/sales`,
-        method: 'GET',
+        method: "GET",
         query: query,
-        format: 'json',
+        format: "json",
         ...params,
       }),
 
@@ -1353,8 +1338,8 @@ export class Api<
     getProductSalesStatistics: (params: RequestParams = {}) =>
       this.request<ProductSalesStatisticsResponseDto[], any>({
         path: `/api/v1/admin/statistics/products`,
-        method: 'GET',
-        format: 'json',
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -1374,13 +1359,28 @@ export class Api<
          */
         threshold?: number;
       },
-      params: RequestParams = {}
+      params: RequestParams = {},
     ) =>
       this.request<ProductResponseDto[], any>({
         path: `/api/v1/admin/products/low-stock`,
-        method: 'GET',
+        method: "GET",
         query: query,
-        format: 'json',
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags order-controller
+     * @name GetAllOrders
+     * @request GET:/api/v1/admin/orders
+     */
+    getAllOrders: (params: RequestParams = {}) =>
+      this.request<OrderListDTO[], any>({
+        path: `/api/v1/admin/orders`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
   };
