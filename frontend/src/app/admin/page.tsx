@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { useAdminAuthStore } from '../../features/auth/adminAuthStore';
 import ProductManagement from '@/components/admin/ProductManagement';
 import OrderManagement from '@/components/admin/OrderManagement';
+import UserManagement from '@/components/admin/UserManagement';
+import CategoryManagement from '@/components/admin/CategoryManagement';
 
 export default function AdminPage() {
   const isAuthenticated = useAdminAuthStore(state => state.isAuthenticated);
@@ -85,6 +87,12 @@ export default function AdminPage() {
                 상품관리
               </button>
               <button
+                className={`w-full bg-black text-white py-2 rounded text-lg font-semibold transition active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 ${selectedMenu === 'category' ? 'ring-2 ring-blue-500' : ''}`}
+                onClick={() => setSelectedMenu('category')}
+              >
+                카테고리 관리
+              </button>
+              <button
                 className={`w-full bg-black text-white py-2 rounded text-lg font-semibold transition active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 ${selectedMenu === 'order' ? 'ring-2 ring-blue-500' : ''}`}
                 onClick={() => setSelectedMenu('order')}
               >
@@ -95,12 +103,6 @@ export default function AdminPage() {
                 onClick={() => setSelectedMenu('user')}
               >
                 사용자 관리
-              </button>
-              <button
-                className={`w-full bg-black text-white py-2 rounded text-lg font-semibold transition active:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 ${selectedMenu === 'category' ? 'ring-2 ring-blue-500' : ''}`}
-                onClick={() => setSelectedMenu('category')}
-              >
-                카테고리 관리
               </button>
               <button
                 className="w-full bg-red-500 text-white py-2 rounded text-lg font-semibold transition hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400"
@@ -140,10 +142,10 @@ export default function AdminPage() {
               <OrderManagement />
             )}
             {isAuthenticated && selectedMenu === 'user' && (
-              <div>사용자 관리 컴포넌트</div>
+              <UserManagement />
             )}
             {isAuthenticated && selectedMenu === 'category' && (
-              <div>카테고리 관리 컴포넌트</div>
+              <CategoryManagement />
             )}
           </div>
         </div>
