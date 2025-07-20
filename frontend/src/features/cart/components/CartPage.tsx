@@ -121,7 +121,7 @@ export function CartPage() {
       shippingAddress: string;
       items: Array<{ productId: number; quantity: number; unitPrice: number }>;
     }) => createOrder(orderData),
-    onSuccess: async () => {
+    onSuccess: async orderDetail => {
       // 주문 생성 성공 후 장바구니 비우기
       try {
         if (isAuthenticated) {
@@ -130,8 +130,17 @@ export function CartPage() {
           clearCartZustand();
         }
         queryClient.invalidateQueries({ queryKey: ['cart', user?.id] });
+        queryClient.invalidateQueries({ queryKey: ['orders', user?.id] });
+        // 상품 목록/상세 쿼리도 invalidate (재고 최신화)
+        queryClient.invalidateQueries({ queryKey: ['products'] });
+        items.forEach(item => {
+          queryClient.invalidateQueries({
+            queryKey: ['product', item.productId],
+          });
+        });
         toast.success('주문이 성공적으로 생성되었습니다!');
-        router.push('/orders');
+        // 주문 상세 자동 오픈: 주문 ID를 쿼리로 전달
+        router.push(`/orders?orderId=${orderDetail.orderId}`);
       } catch (error) {
         console.error('Cart clear error:', error);
         // 장바구니 비우기 실패해도 주문은 성공했으므로 주문 페이지로 이동
@@ -202,25 +211,19 @@ export function CartPage() {
       return;
     }
 
-    // 임시로 주문 생성 기능 비활성화 (백엔드 데이터베이스 이슈)
-    toast.error(
-      '주문 생성 기능이 일시적으로 비활성화되었습니다. 관리자에게 문의해주세요.'
-    );
-    return;
-
     // 주문 데이터 생성 (상태는 백엔드에서 자동 설정)
-    // const orderData = {
-    //   userId: user?.id,
-    //   deliveryId: 1, // 기본 배송 ID 추가
-    //   shippingAddress: user?.address || '주소 정보가 없습니다.',
-    //   items: items.map(item => ({
-    //     productId: item.productId,
-    //     quantity: item.quantity,
-    //     unitPrice: item.price,
-    //   })),
-    // };
+    const orderData = {
+      userId: user.id,
+      deliveryId: 1, // 기본 배송 ID 추가
+      shippingAddress: user.address || '주소 정보가 없습니다.',
+      items: items.map(item => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: item.price,
+      })),
+    };
 
-    // createOrderMutation.mutate(orderData);
+    createOrderMutation.mutate(orderData);
   };
 
   const clearCartZustand = useCartStore(state => state.clearCart);

@@ -3,11 +3,25 @@ import { Card } from '@/components/ui/card';
 import { Coffee } from 'lucide-react';
 import type { OrderListDTO } from '@/lib/backend/apiV1/api';
 
-export function OrderCard({ order }: { order: OrderListDTO }) {
+interface OrderCardProps {
+  order: OrderListDTO;
+  onDetailClick?: () => void;
+}
+
+export function OrderCard({ order, onDetailClick }: OrderCardProps) {
   // 날짜 포맷팅
   const formatDate = (dateString?: string) => {
     if (!dateString) return '날짜 없음';
-    return new Date(dateString).toLocaleDateString('ko-KR');
+    const date = new Date(dateString);
+    return date.toLocaleString('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    });
   };
 
   return (
@@ -36,8 +50,16 @@ export function OrderCard({ order }: { order: OrderListDTO }) {
         </div>
       </div>
 
-      <div className="text-right text-brown-900 font-bold text-lg">
-        총액: {(order.totalPrice || 0).toLocaleString()}원
+      <div className="flex items-center justify-between mt-4">
+        <div className="text-brown-900 font-bold text-lg">
+          총액: {(order.totalPrice || 0).toLocaleString()}원
+        </div>
+        <button
+          onClick={onDetailClick}
+          className="px-4 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 text-sm font-semibold shadow"
+        >
+          상세보기
+        </button>
       </div>
     </Card>
   );

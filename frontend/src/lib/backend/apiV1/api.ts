@@ -86,6 +86,38 @@ export interface ProductResponseDto {
   category?: CategoryResponseDto;
 }
 
+export interface DeliveryRequestDto {
+  /**
+   * @minLength 0
+   * @maxLength 200
+   */
+  address: string;
+  /**
+   * @minLength 0
+   * @maxLength 50
+   */
+  trackingNumber?: string;
+  /**
+   * @minLength 0
+   * @maxLength 50
+   */
+  company?: string;
+  status?: '배송준비중' | '배송중' | '배송완료';
+}
+
+export interface DeliveryResponseDto {
+  /** @format int32 */
+  id?: number;
+  address?: string;
+  /** @format date-time */
+  startDate?: string;
+  /** @format date-time */
+  completeDate?: string;
+  trackingNumber?: string;
+  status?: '배송준비중' | '배송중' | '배송완료';
+  company?: string;
+}
+
 export interface CategoryRequestDto {
   /**
    * @minLength 0
@@ -96,37 +128,27 @@ export interface CategoryRequestDto {
   parentId?: number;
 }
 
-export interface OrderPayDTO {
-  paymentMethod?: string;
-  paymentDetails?: string;
-}
-
-export interface OrderDetailDTO {
+export interface ProductSearchDto {
+  name?: string;
   /** @format int32 */
-  orderId?: number;
-  shippingAddress?: string;
-  /** @format int32 */
-  totalPrice?: number;
-  status?:
-    | '결제대기'
-    | '결제완료'
-    | '배송준비중'
-    | '배송중'
-    | '배송완료'
-    | '취소'
-    | '환불';
-  /** @format date-time */
-  orderDate?: string;
-  username?: string;
-  items?: OrderItemDetailDTO[];
-}
-
-export interface OrderItemDetailDTO {
-  productName?: string;
-  /** @format int32 */
-  quantity?: number;
-  /** @format int32 */
-  unitPrice?: number;
+  categoryId?: number;
+  /**
+   * @format int32
+   * @min 0
+   */
+  minPrice?: number;
+  /**
+   * @format int32
+   * @min 0
+   */
+  maxPrice?: number;
+  /**
+   * @format int32
+   * @min 0
+   */
+  minStock?: number;
+  includeOutOfStock?: boolean;
+  includeSubCategories?: boolean;
 }
 
 export interface OrderItemRequestDTO {
@@ -143,8 +165,29 @@ export interface OrderRequestDTO {
   userId?: number;
   /** @format int32 */
   deliveryId?: number;
-  shippingAddress?: string;
+  address?: string;
   items?: OrderItemRequestDTO[];
+}
+
+export interface OrderDetailDTO {
+  /** @format int32 */
+  orderId?: number;
+  address?: string;
+  /** @format int32 */
+  totalPrice?: number;
+  status?: '배송준비중' | '배송중' | '배송완료' | '취소';
+  /** @format date-time */
+  orderDate?: string;
+  username?: string;
+  items?: OrderItemDetailDTO[];
+}
+
+export interface OrderItemDetailDTO {
+  productName?: string;
+  /** @format int32 */
+  quantity?: number;
+  /** @format int32 */
+  unitPrice?: number;
 }
 
 export interface AddCartItemRequest {
@@ -184,14 +227,7 @@ export interface ChangePasswordRequest {
 export interface OrderStatusUpdateDTO {
   /** @format int32 */
   orderId?: number;
-  newStatus?:
-    | '결제대기'
-    | '결제완료'
-    | '배송준비중'
-    | '배송중'
-    | '배송완료'
-    | '취소'
-    | '환불';
+  newStatus?: '배송준비중' | '배송중' | '배송완료' | '취소';
 }
 
 export interface OrderListDTO {
@@ -202,14 +238,7 @@ export interface OrderListDTO {
   orderDate?: string;
   /** @format int32 */
   totalPrice?: number;
-  status?:
-    | '결제대기'
-    | '결제완료'
-    | '배송준비중'
-    | '배송중'
-    | '배송완료'
-    | '취소'
-    | '환불';
+  status?: '배송준비중' | '배송중' | '배송완료' | '취소';
 }
 
 export interface CartDto {
@@ -276,6 +305,19 @@ export interface ProductSalesStatisticsResponseDto {
   totalQuantitySold?: number;
   /** @format int64 */
   totalSalesAmount?: number;
+}
+
+export interface PageResponseDtoDeliveryResponseDto {
+  content?: DeliveryResponseDto[];
+  /** @format int32 */
+  pageNumber?: number;
+  /** @format int32 */
+  pageSize?: number;
+  /** @format int64 */
+  totalElements?: number;
+  /** @format int32 */
+  totalPages?: number;
+  isLast?: boolean;
 }
 
 import type {
@@ -539,10 +581,11 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 특정 상품 ID의 정보를 수정합니다. 관리자 권한이 필요합니다.
      *
-     * @tags product-controller
+     * @tags admin-product-controller
      * @name UpdateProduct
+     * @summary 관리자 - 상품 정보 수정
      * @request PUT:/api/v1/admin/products/{id}
      */
     updateProduct: (
@@ -560,10 +603,11 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 특정 상품을 삭제합니다. 관리자 권한이 필요합니다.
      *
-     * @tags product-controller
+     * @tags admin-product-controller
      * @name DeleteProduct
+     * @summary 관리자 - 상품 삭제
      * @request DELETE:/api/v1/admin/products/{id}
      */
     deleteProduct: (id: number, params: RequestParams = {}) =>
@@ -574,9 +618,62 @@ export class Api<
       }),
 
     /**
+     * @description 특정 배송 ID를 통해 상세 정보를 조회합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name GetDeliveryById
+     * @summary 관리자 - 특정 배송 정보 조회
+     * @request GET:/api/v1/admin/deliveries/{deliveryId}
+     */
+    getDeliveryById: (deliveryId: number, params: RequestParams = {}) =>
+      this.request<DeliveryResponseDto, any>({
+        path: `/api/v1/admin/deliveries/${deliveryId}`,
+        method: 'GET',
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 특정 배송 ID의 정보를 업데이트합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name UpdateDelivery
+     * @summary 관리자 - 특정 배송 정보 업데이트
+     * @request PUT:/api/v1/admin/deliveries/{deliveryId}
+     */
+    updateDelivery: (
+      deliveryId: number,
+      data: DeliveryRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<DeliveryResponseDto, any>({
+        path: `/api/v1/admin/deliveries/${deliveryId}`,
+        method: 'PUT',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 특정 배송 ID의 정보를 삭제합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name DeleteDelivery
+     * @summary 관리자 - 특정 배송 정보 삭제
+     * @request DELETE:/api/v1/admin/deliveries/{deliveryId}
+     */
+    deleteDelivery: (deliveryId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/v1/admin/deliveries/${deliveryId}`,
+        method: 'DELETE',
+        ...params,
+      }),
+
+    /**
      * No description
      *
-     * @tags category-controller
+     * @tags admin-category-controller
      * @name UpdateCategory
      * @request PUT:/api/v1/admin/categories/{id}
      */
@@ -597,7 +694,7 @@ export class Api<
     /**
      * No description
      *
-     * @tags category-controller
+     * @tags admin-category-controller
      * @name DeleteCategory
      * @request DELETE:/api/v1/admin/categories/{id}
      */
@@ -609,19 +706,50 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 쿼리 파라미터를 사용하여 상품명, 카테고리, 가격 범위, 재고 등으로 상품을 검색합니다.
      *
-     * @tags order-controller
-     * @name PayForOrder
-     * @request POST:/api/v1/orders/{orderId}/pay
+     * @tags product-controller
+     * @name SearchProductsWithParams
+     * @summary 통합 상품 검색 (GET)
+     * @request GET:/api/v1/products/search
      */
-    payForOrder: (
-      orderId: number,
-      data: OrderPayDTO,
+    searchProductsWithParams: (
+      query?: {
+        name?: string;
+        /** @format int32 */
+        categoryId?: number;
+        /** @format int32 */
+        minPrice?: number;
+        /** @format int32 */
+        maxPrice?: number;
+        /** @format int32 */
+        minStock?: number;
+        /** @default true */
+        includeOutOfStock?: boolean;
+        /** @default false */
+        includeSubCategories?: boolean;
+      },
       params: RequestParams = {}
     ) =>
-      this.request<OrderDetailDTO, any>({
-        path: `/api/v1/orders/${orderId}/pay`,
+      this.request<ProductResponseDto[], any>({
+        path: `/api/v1/products/search`,
+        method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 상품명, 카테고리, 가격 범위, 재고 등 다양한 조건으로 상품을 검색합니다. 요청 본문으로 검색 조건을 전달합니다.
+     *
+     * @tags product-controller
+     * @name SearchProducts
+     * @summary 통합 상품 검색 (POST)
+     * @request POST:/api/v1/products/search
+     */
+    searchProducts: (data: ProductSearchDto, params: RequestParams = {}) =>
+      this.request<ProductResponseDto[], any>({
+        path: `/api/v1/products/search`,
         method: 'POST',
         body: data,
         type: ContentType.Json,
@@ -633,12 +761,27 @@ export class Api<
      * No description
      *
      * @tags order-controller
+     * @name GetMyOrders
+     * @request GET:/api/v1/orders
+     */
+    getMyOrders: (params: RequestParams = {}) =>
+      this.request<OrderListDTO[], any>({
+        path: `/api/v1/orders`,
+        method: 'GET',
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags order-controller
      * @name CreateOrder
-     * @request POST:/api/v1/orders/orders
+     * @request POST:/api/v1/orders
      */
     createOrder: (data: OrderRequestDTO, params: RequestParams = {}) =>
       this.request<OrderDetailDTO, any>({
-        path: `/api/v1/orders/orders`,
+        path: `/api/v1/orders`,
         method: 'POST',
         body: data,
         type: ContentType.Json,
@@ -753,10 +896,11 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 새로운 상품을 생성합니다. 관리자 권한이 필요합니다.
      *
-     * @tags product-controller
+     * @tags admin-product-controller
      * @name CreateProduct
+     * @summary 관리자 - 상품 생성
      * @request POST:/api/v1/admin/products
      */
     createProduct: (data: ProductRequestDto, params: RequestParams = {}) =>
@@ -770,9 +914,49 @@ export class Api<
       }),
 
     /**
+     * @description 모든 배송 정보 목록을 조회합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name GetAllDeliveries
+     * @summary 관리자 - 모든 배송 정보 조회 (페이지네이션 가능)
+     * @request GET:/api/v1/admin/deliveries
+     */
+    getAllDeliveries: (
+      query: {
+        pageable: Pageable;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<PageResponseDtoDeliveryResponseDto, any>({
+        path: `/api/v1/admin/deliveries`,
+        method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 새로운 배송 정보를 생성합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name CreateDelivery
+     * @summary 관리자 - 새로운 배송 정보 생성
+     * @request POST:/api/v1/admin/deliveries
+     */
+    createDelivery: (data: DeliveryRequestDto, params: RequestParams = {}) =>
+      this.request<DeliveryResponseDto, any>({
+        path: `/api/v1/admin/deliveries`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
      * No description
      *
-     * @tags category-controller
+     * @tags admin-category-controller
      * @name CreateCategory
      * @request POST:/api/v1/admin/categories
      */
@@ -840,10 +1024,34 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 특정 배송 ID의 상태를 업데이트합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name UpdateDeliveryStatus
+     * @summary 관리자 - 특정 배송 상태 업데이트
+     * @request PATCH:/api/v1/admin/deliveries/{deliveryId}/status
+     */
+    updateDeliveryStatus: (
+      deliveryId: number,
+      query: {
+        status: '배송준비중' | '배송중' | '배송완료';
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<DeliveryResponseDto, any>({
+        path: `/api/v1/admin/deliveries/${deliveryId}/status`,
+        method: 'PATCH',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 등록된 모든 상품의 목록을 조회합니다. 모든 사용자가 접근 가능합니다.
      *
      * @tags product-controller
      * @name GetAllProducts
+     * @summary 전체 상품 목록 조회
      * @request GET:/api/v1/products
      */
     getAllProducts: (params: RequestParams = {}) =>
@@ -855,10 +1063,11 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 상품 ID를 통해 특정 상품의 상세 정보를 조회합니다. 모든 사용자가 접근 가능합니다.
      *
      * @tags product-controller
      * @name GetProductById
+     * @summary 특정 상품 조회
      * @request GET:/api/v1/products/{id}
      */
     getProductById: (id: number, params: RequestParams = {}) =>
@@ -870,16 +1079,88 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 상품명에 검색어가 포함된 상품들을 조회합니다.
      *
-     * @tags order-controller
-     * @name GetMyOrders
-     * @request GET:/api/v1/orders
+     * @tags product-controller
+     * @name SearchProductsByName
+     * @summary 상품명으로 검색
+     * @request GET:/api/v1/products/search/name
      */
-    getMyOrders: (params: RequestParams = {}) =>
-      this.request<OrderListDTO[], any>({
-        path: `/api/v1/orders`,
+    searchProductsByName: (
+      query: {
+        name: string;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<ProductResponseDto[], any>({
+        path: `/api/v1/products/search/name`,
         method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 지정된 최소 가격과 최대 가격 사이의 상품들을 조회합니다.
+     *
+     * @tags product-controller
+     * @name GetProductsByPriceRange
+     * @summary 가격 범위별 상품 조회
+     * @request GET:/api/v1/products/price-range
+     */
+    getProductsByPriceRange: (
+      query: {
+        /** @format int32 */
+        minPrice: number;
+        /** @format int32 */
+        maxPrice: number;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<ProductResponseDto[], any>({
+        path: `/api/v1/products/price-range`,
+        method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 재고가 0인 품절된 상품들의 목록을 조회합니다.
+     *
+     * @tags product-controller
+     * @name GetOutOfStockProducts
+     * @summary 품절 상품 조회
+     * @request GET:/api/v1/products/out-of-stock
+     */
+    getOutOfStockProducts: (params: RequestParams = {}) =>
+      this.request<ProductResponseDto[], any>({
+        path: `/api/v1/products/out-of-stock`,
+        method: 'GET',
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 특정 카테고리에 속한 상품들을 조회합니다. 하위 카테고리 포함 여부를 선택할 수 있습니다.
+     *
+     * @tags product-controller
+     * @name GetProductsByCategory
+     * @summary 카테고리별 상품 조회
+     * @request GET:/api/v1/products/category/{categoryId}
+     */
+    getProductsByCategory: (
+      categoryId: number,
+      query?: {
+        /** @default false */
+        includeSubCategories?: boolean;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<ProductResponseDto[], any>({
+        path: `/api/v1/products/category/${categoryId}`,
+        method: 'GET',
+        query: query,
         format: 'json',
         ...params,
       }),
@@ -915,10 +1196,11 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 등록된 모든 카테고리의 목록을 조회합니다. 모든 사용자가 접근 가능합니다.
      *
      * @tags category-controller
      * @name GetAllCategories
+     * @summary 전체 카테고리 목록 조회
      * @request GET:/api/v1/categories
      */
     getAllCategories: (params: RequestParams = {}) =>
@@ -930,10 +1212,11 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 카테고리 ID를 통해 특정 카테고리의 상세 정보를 조회합니다. 모든 사용자가 접근 가능합니다.
      *
      * @tags category-controller
      * @name GetCategoryById
+     * @summary 특정 카테고리 조회
      * @request GET:/api/v1/categories/{id}
      */
     getCategoryById: (id: number, params: RequestParams = {}) =>
@@ -945,10 +1228,11 @@ export class Api<
       }),
 
     /**
-     * No description
+     * @description 부모 카테고리가 없는 최상위 카테고리들의 목록을 조회합니다.
      *
      * @tags category-controller
      * @name GetRootCategories
+     * @summary 루트 카테고리 조회
      * @request GET:/api/v1/categories/roots
      */
     getRootCategories: (params: RequestParams = {}) =>
@@ -1070,6 +1354,32 @@ export class Api<
       this.request<ProductSalesStatisticsResponseDto[], any>({
         path: `/api/v1/admin/statistics/products`,
         method: 'GET',
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 지정된 임계값 이하의 재고를 가진 상품들을 조회합니다. 현재 기본 임계값은 10개입니다.
+     *
+     * @tags admin-product-controller
+     * @name GetLowStockProducts
+     * @summary 관리자 - 재고 부족 상품 조회
+     * @request GET:/api/v1/admin/products/low-stock
+     */
+    getLowStockProducts: (
+      query?: {
+        /**
+         * @format int32
+         * @default 10
+         */
+        threshold?: number;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<ProductResponseDto[], any>({
+        path: `/api/v1/admin/products/low-stock`,
+        method: 'GET',
+        query: query,
         format: 'json',
         ...params,
       }),
