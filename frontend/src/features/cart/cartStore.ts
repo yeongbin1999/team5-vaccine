@@ -9,6 +9,8 @@ import {
   clearCart as apiClearCart,
 } from './api';
 import { useAuthStore } from '../auth/authStore';
+import { queryClient } from '@/components/providers/QueryProvider';
+import { apiClient } from '@/lib/backend/apiV1/client';
 
 interface CartStore {
   items: CartItem[];
@@ -246,4 +248,75 @@ export const useCartStore = create<CartStore>()(
 
 export function useCartHydrated() {
   return useCartStore(state => state._hasHydrated);
+}
+
+/**
+ * 로그인 후 장바구니 동기화: sessionStorage(비로그인)와 서버 장바구니를 병합(수량 합치기)
+ * 1. 서버 장바구니 fetch
+ * 2. sessionStorage 장바구니 fetch
+ * 3. 두 장바구니 병합(같은 상품은 수량 합치기)
+ * 4. 서버에 없는 상품은 서버에 추가
+ * 5. zustand store 갱신
+ */
+export async function syncCartOnLogin() {
+  // 1. 서버 장바구니 fetch
+  let serverCart: CartItem[] = [];
+  try {
+    serverCart = await fetchCart();
+  } catch (e) {
+    serverCart = [];
+  }
+
+  // 2. sessionStorage 장바구니 fetch (zustand persist 구조)
+  let guestCart: CartItem[] = [];
+  try {
+    const raw = sessionStorage.getItem('cart-storage');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      guestCart = parsed.state?.items || [];
+    }
+  } catch (e) {
+    guestCart = [];
+  }
+
+  // 3. 병합 (productId 기준, 수량 합치기)
+  const mergedMap = new Map<number, CartItem>();
+  for (const item of serverCart) {
+    mergedMap.set(item.productId, { ...item });
+  }
+  for (const item of guestCart) {
+    if (mergedMap.has(item.productId)) {
+      // 수량 합치기
+      const exist = mergedMap.get(item.productId)!;
+      mergedMap.set(item.productId, {
+        ...exist,
+        quantity: exist.quantity + item.quantity,
+      });
+    } else {
+      mergedMap.set(item.productId, { ...item });
+    }
+  }
+  const mergedCart = Array.from(mergedMap.values());
+
+  // 4. 서버에 없는 상품은 서버에 추가, 있으면 수량 update
+  const userId = useAuthStore.getState().user?.id;
+  if (userId) {
+    for (const item of mergedCart) {
+      const serverItem = serverCart.find(i => i.productId === item.productId);
+      if (!serverItem) {
+        // 서버에 없는 상품은 추가
+        await addToCart({ productId: item.productId, quantity: item.quantity });
+      } else if (serverItem.quantity !== item.quantity) {
+        // 서버에 이미 있으면 수량 update
+        await apiUpdateCartItem({ itemId: serverItem.id, quantity: item.quantity });
+      }
+    }
+  }
+
+  // 5. zustand store 갱신 (최종 서버 fetch)
+  const finalCart = await fetchCart();
+  useCartStore.setState({ items: finalCart });
+
+  // 6. sessionStorage 비우기 (병합 후)
+  sessionStorage.removeItem('cart-storage');
 }
