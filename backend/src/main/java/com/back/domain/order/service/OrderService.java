@@ -1,5 +1,6 @@
 package com.back.domain.order.service;
 
+import com.back.domain.admin.dto.OrderStatisticsResponseDto;
 import com.back.domain.delivery.entity.Delivery;
 import com.back.domain.order.dto.order.OrderDetailDTO;
 import com.back.domain.order.dto.order.OrderListDTO;
@@ -9,24 +10,31 @@ import com.back.domain.order.dto.orderitem.OrderItemRequestDTO;
 import com.back.domain.order.entity.Order;
 import com.back.domain.order.entity.OrderItem;
 import com.back.domain.order.entity.OrderStatus;
+import com.back.domain.order.exception.InsufficientStockException;
+import com.back.domain.order.exception.OrderNotFoundException;
 import com.back.domain.order.repository.OrderItemRepository;
 import com.back.domain.order.repository.OrderRepository;
 import com.back.domain.product.entity.Product;
+import com.back.domain.product.exception.ProductNotFoundException;
 import com.back.domain.product.repository.ProductRepository;
 import com.back.domain.user.entity.Role;
 import com.back.domain.user.entity.User;
 import com.back.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -37,51 +45,76 @@ public class OrderService {
 
     @Transactional
     public OrderDetailDTO createOrder(OrderRequestDTO request) {
+        // 사용자 검증
         User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-        Delivery deliveryRef = entityManager.getReference(Delivery.class, request.deliveryId());
-
-        Order order = new Order();
-        order.setUser(user);
-        order.setAddress(request.address());
-        order.setDelivery(deliveryRef);
-        order.setOrderDate(LocalDateTime.now());
-        order.setStatus(OrderStatus.배송준비중);
-
-        Order savedOrder = orderRepository.save(order);
-        int totalPrice = 0;
-
-        for (OrderItemRequestDTO item : request.items()) {
-            Product product = productRepository.findById(item.productId())
-                    .orElseThrow(() -> new IllegalArgumentException("상품 없음"));
-
-            // 재고 확인 및 차감
-            int remain = product.getStock() - item.quantity();
-            if (remain < 0) {
-                throw new IllegalArgumentException("상품 '" + product.getName() + "'의 재고가 부족합니다.");
-            }
-            product.setStock(remain);
-
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(savedOrder);
-            orderItem.setProduct(product);
-            orderItem.setQuantity(item.quantity());
-            orderItem.setUnitPrice(item.unitPrice());
-
-            orderItemRepository.save(orderItem);
-            totalPrice += item.unitPrice() * item.quantity();
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + request.userId()));
+        
+        // 배송 정보 존재 여부 검증
+        Delivery delivery = entityManager.find(Delivery.class, request.deliveryId());
+        if (delivery == null) {
+            throw new IllegalArgumentException("배송 정보를 찾을 수 없습니다. ID: " + request.deliveryId());
         }
 
-        savedOrder.setTotalPrice(totalPrice);
-        return OrderDetailDTO.from(savedOrder, orderItemRepository.findByOrder(savedOrder));
+        // 주문 생성 (totalPrice는 나중에 계산)
+        Order order = Order.builder()
+                .user(user)
+                .address(request.address())
+                .delivery(delivery)
+                .orderDate(LocalDateTime.now())
+                .status(OrderStatus.배송준비중)
+                .totalPrice(0)
+                .build();
+
+        // 주문 항목 처리 및 재고 검증 (주문에 직접 추가)
+        List<OrderItem> orderItems = processOrderItems(request.items(), order);
+        
+        // 총 금액 계산 및 설정
+        order.calculateTotalPrice();
+
+        // 한 번에 저장 (Cascade로 OrderItem도 함께 저장됨)
+        Order savedOrder = orderRepository.save(order);
+
+        return OrderDetailDTO.from(savedOrder, orderItems);
     }
 
+    private List<OrderItem> processOrderItems(List<OrderItemRequestDTO> itemRequests, Order order) {
+        List<OrderItem> orderItems = new ArrayList<>();
+        
+        for (OrderItemRequestDTO itemRequest : itemRequests) {
+            // 상품 조회
+            Product product = productRepository.findById(itemRequest.productId())
+                    .orElseThrow(() -> new ProductNotFoundException("상품을 찾을 수 없습니다. ID: " + itemRequest.productId()));
 
-    // 2. 내 주문 목록 조회
-    public List<OrderListDTO> getMyOrders(int userId) {
+            // 재고 검증
+            if (product.getStock() < itemRequest.quantity()) {
+                throw new InsufficientStockException(
+                        product.getName(), itemRequest.quantity(), product.getStock());
+            }
+            
+            // 재고 차감
+            product.setStock(product.getStock() - itemRequest.quantity());
+
+            // 주문 항목 생성 및 주문에 추가
+            OrderItem orderItem = OrderItem.builder()
+                    .order(order)
+                    .product(product)
+                    .quantity(itemRequest.quantity())
+                    .unitPrice(itemRequest.unitPrice())
+                    .build();
+
+            // 주문에 직접 추가 (양방향 관계 설정)
+            order.addOrderItem(orderItem);
+            orderItems.add(orderItem);
+        }
+        
+        return orderItems;
+    }
+
+    public List<OrderListDTO> getMyOrders(Integer userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
-        return orderRepository.findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. ID: " + userId));
+        
+        return orderRepository.findByUserOrderByOrderDateDesc(user)
                 .stream()
                 .map(OrderListDTO::from)
                 .toList();
@@ -109,19 +142,78 @@ public class OrderService {
         return user.getRole() == Role.ADMIN;
     }
 
-
     // 4. 관리자 - 전체 주문 목록
     public List<OrderListDTO> getAllOrders() {
-        return orderRepository.findAll()
+        return orderRepository.findAllByOrderByOrderDateDesc()
                 .stream()
                 .map(OrderListDTO::from)
                 .toList();
     }
 
-    // 5. 관리자 - 주문 상태 변경
+    public List<OrderListDTO> getAllOrdersByStatus(OrderStatus status) {
+        return orderRepository.findByStatusOrderByOrderDateDesc(status)
+                .stream()
+                .map(OrderListDTO::from)
+                .toList();
+    }
+
+    public Page<OrderListDTO> getAllOrdersWithPagination(Pageable pageable, OrderStatus status) {
+        Page<Order> orders;
+        if (status != null) {
+            orders = orderRepository.findByStatusOrderByOrderDateDesc(status, pageable);
+        } else {
+            orders = orderRepository.findAllByOrderByOrderDateDesc(pageable);
+        }
+        return orders.map(OrderListDTO::from);
+    }
+
+    public OrderDetailDTO getOrderDetailForAdmin(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        
+        List<OrderItem> items = orderItemRepository.findByOrder(order);
+        return OrderDetailDTO.from(order, items);
+    }
+
+    public List<OrderStatisticsResponseDto> getOrderStatistics(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.plusDays(1).atStartOfDay();
+        
+        List<Order> orders = orderRepository.findByOrderDateBetween(startDateTime, endDateTime);
+        
+        return orders.stream()
+                .collect(java.util.stream.Collectors.groupingBy(
+                        order -> order.getOrderDate().toLocalDate(),
+                        java.util.stream.Collectors.groupingBy(
+                                Order::getStatus,
+                                java.util.stream.Collectors.collectingAndThen(
+                                        java.util.stream.Collectors.toList(),
+                                        orderList -> {
+                                            long count = orderList.size();
+                                            long revenue = orderList.stream()
+                                                    .mapToLong(Order::getTotalPrice)
+                                                    .sum();
+                                            return new OrderStatisticsResponseDto(
+                                                    orderList.getFirst().getOrderDate().toLocalDate(),
+                                                    orderList.getFirst().getStatus(),
+                                                    count,
+                                                    revenue
+                                            );
+                                        }
+                                )
+                        )
+                ))
+                .values()
+                .stream()
+                .flatMap(statusMap -> statusMap.values().stream())
+                .toList();
+    }
+
+    @Transactional
     public OrderDetailDTO updateOrderStatus(OrderStatusUpdateDTO dto) {
         Order order = orderRepository.findById(dto.orderId())
-                .orElseThrow(() -> new IllegalArgumentException("주문 없음"));
+                .orElseThrow(() -> new OrderNotFoundException(dto.orderId()));
+        
         order.setStatus(dto.newStatus());
         List<OrderItem> items = orderItemRepository.findByOrder(order);
         return OrderDetailDTO.from(order, items);
