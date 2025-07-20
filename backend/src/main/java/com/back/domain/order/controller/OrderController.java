@@ -22,7 +22,7 @@ public class OrderController {
     private final OrderService orderService;
 
     // 1. 주문 생성
-    @PostMapping("/orders")
+    @PostMapping
     public ResponseEntity<OrderDetailDTO> createOrder(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody OrderRequestDTO request
