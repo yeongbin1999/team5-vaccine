@@ -239,7 +239,6 @@ export interface OrderListDTO {
   /** @format int32 */
   totalPrice?: number;
   status?: "배송준비중" | "배송중" | "배송완료" | "취소";
-}
 
 export interface CartDto {
   /** @format int32 */
@@ -279,6 +278,19 @@ export interface Pageable {
 
 export interface PageResponseDtoUserResponse {
   content?: UserResponse[];
+  /** @format int32 */
+  pageNumber?: number;
+  /** @format int32 */
+  pageSize?: number;
+  /** @format int64 */
+  totalElements?: number;
+  /** @format int32 */
+  totalPages?: number;
+  isLast?: boolean;
+}
+
+export interface PageResponseDtoDeliveryResponseDto {
+  content?: DeliveryResponseDto[];
   /** @format int32 */
   pageNumber?: number;
   /** @format int32 */
@@ -654,6 +666,59 @@ export class Api<
       }),
 
     /**
+     * @description 특정 배송 ID를 통해 상세 정보를 조회합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name GetDeliveryById
+     * @summary 관리자 - 특정 배송 정보 조회
+     * @request GET:/api/v1/admin/deliveries/{deliveryId}
+     */
+    getDeliveryById: (deliveryId: number, params: RequestParams = {}) =>
+      this.request<DeliveryResponseDto, any>({
+        path: `/api/v1/admin/deliveries/${deliveryId}`,
+        method: 'GET',
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 특정 배송 ID의 정보를 업데이트합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name UpdateDelivery
+     * @summary 관리자 - 특정 배송 정보 업데이트
+     * @request PUT:/api/v1/admin/deliveries/{deliveryId}
+     */
+    updateDelivery: (
+      deliveryId: number,
+      data: DeliveryRequestDto,
+      params: RequestParams = {}
+    ) =>
+      this.request<DeliveryResponseDto, any>({
+        path: `/api/v1/admin/deliveries/${deliveryId}`,
+        method: 'PUT',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 특정 배송 ID의 정보를 삭제합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name DeleteDelivery
+     * @summary 관리자 - 특정 배송 정보 삭제
+     * @request DELETE:/api/v1/admin/deliveries/{deliveryId}
+     */
+    deleteDelivery: (deliveryId: number, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/v1/admin/deliveries/${deliveryId}`,
+        method: 'DELETE',
+        ...params,
+      }),
+
+    /**
      * No description
      *
      * @tags admin-category-controller
@@ -752,6 +817,21 @@ export class Api<
         path: `/api/v1/orders`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags order-controller
+     * @name GetMyOrders
+     * @request GET:/api/v1/orders
+     */
+    getMyOrders: (params: RequestParams = {}) =>
+      this.request<OrderListDTO[], any>({
+        path: `/api/v1/orders`,
+        method: 'GET',
+        format: 'json',
         ...params,
       }),
 
@@ -933,6 +1013,46 @@ export class Api<
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 모든 배송 정보 목록을 조회합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name GetAllDeliveries
+     * @summary 관리자 - 모든 배송 정보 조회 (페이지네이션 가능)
+     * @request GET:/api/v1/admin/deliveries
+     */
+    getAllDeliveries: (
+      query: {
+        pageable: Pageable;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<PageResponseDtoDeliveryResponseDto, any>({
+        path: `/api/v1/admin/deliveries`,
+        method: 'GET',
+        query: query,
+        format: 'json',
+        ...params,
+      }),
+
+    /**
+     * @description 새로운 배송 정보를 생성합니다. (ADMIN 권한 필요)
+     *
+     * @tags delivery-controller
+     * @name CreateDelivery
+     * @summary 관리자 - 새로운 배송 정보 생성
+     * @request POST:/api/v1/admin/deliveries
+     */
+    createDelivery: (data: DeliveryRequestDto, params: RequestParams = {}) =>
+      this.request<DeliveryResponseDto, any>({
+        path: `/api/v1/admin/deliveries`,
+        method: 'POST',
+        body: data,
+        type: ContentType.Json,
+        format: 'json',
         ...params,
       }),
 
@@ -1323,6 +1443,32 @@ export class Api<
         path: `/api/v1/admin/orders`,
         method: "GET",
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description 지정된 임계값 이하의 재고를 가진 상품들을 조회합니다. 현재 기본 임계값은 10개입니다.
+     *
+     * @tags admin-product-controller
+     * @name GetLowStockProducts
+     * @summary 관리자 - 재고 부족 상품 조회
+     * @request GET:/api/v1/admin/products/low-stock
+     */
+    getLowStockProducts: (
+      query?: {
+        /**
+         * @format int32
+         * @default 10
+         */
+        threshold?: number;
+      },
+      params: RequestParams = {}
+    ) =>
+      this.request<ProductResponseDto[], any>({
+        path: `/api/v1/admin/products/low-stock`,
+        method: 'GET',
+        query: query,
+        format: 'json',
         ...params,
       }),
   };

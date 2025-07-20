@@ -10,9 +10,9 @@ import java.util.List;
 
 //주문 상세 페이지에서 하나의 주문을 자세히 보여줄 때 응답용
 public record OrderDetailDTO(
-        int orderId,
+        Integer orderId,
         String address,
-        int totalPrice,
+        Integer totalPrice,
         OrderStatus status,
         LocalDateTime orderDate,
         String username,
