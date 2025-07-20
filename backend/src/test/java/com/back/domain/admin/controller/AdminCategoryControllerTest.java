@@ -197,7 +197,7 @@ public class AdminCategoryControllerTest {
         // 생성된 카테고리 삭제 - HTTP Status 204 No Content 응답 확인
         mockMvc.perform(delete("/api/v1/admin/categories/{categoryId}", createdId))
                 .andDo(print())
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         // 삭제 확인 - 공개 API로 확인
         mockMvc.perform(get("/api/v1/categories/{categoryId}", createdId))

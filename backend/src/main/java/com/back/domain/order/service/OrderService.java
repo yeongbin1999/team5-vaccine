@@ -12,12 +12,12 @@ import com.back.domain.order.entity.OrderItem;
 import com.back.domain.order.entity.OrderStatus;
 import com.back.domain.order.exception.InsufficientStockException;
 import com.back.domain.order.exception.OrderNotFoundException;
-import com.back.domain.order.exception.UnauthorizedOrderAccessException;
 import com.back.domain.order.repository.OrderItemRepository;
 import com.back.domain.order.repository.OrderRepository;
 import com.back.domain.product.entity.Product;
 import com.back.domain.product.exception.ProductNotFoundException;
 import com.back.domain.product.repository.ProductRepository;
+import com.back.domain.user.entity.Role;
 import com.back.domain.user.entity.User;
 import com.back.domain.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
@@ -120,24 +120,29 @@ public class OrderService {
                 .toList();
     }
 
-    public OrderDetailDTO getOrderDetail(Integer orderId, Integer userId) {
-        Order order = orderRepository.findByIdAndUserId(orderId, userId)
-                .orElseThrow(() -> {
-                    // 주문이 존재하는지 먼저 확인
-                    if (orderRepository.existsById(orderId)) {
-                        // 주문은 존재하지만 권한이 없는 경우
-                        throw new UnauthorizedOrderAccessException();
-                    } else {
-                        // 주문 자체가 존재하지 않는 경우
-                        throw new OrderNotFoundException(orderId);
-                    }
-                });
+    // 3. 주문 상세 조회 (관리자는 모두 가능, 일반 사용자는 본인 주문만)
+    public OrderDetailDTO getOrderDetail(int orderId, int userId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자 없음"));
+
+        // 관리자라면 모든 주문 조회 가능
+        if (!isAdmin(user) && order.getUser().getId() != userId) {
+            throw new SecurityException("본인의 주문만 조회할 수 있습니다.");
+        }
 
         List<OrderItem> items = orderItemRepository.findByOrder(order);
         return OrderDetailDTO.from(order, items);
     }
 
-    // 관리자 전용 메서드들
+    private boolean isAdmin(User user) {
+        // 예: User 엔티티에 getRole()이 있다고 가정
+        return user.getRole() == Role.ADMIN;
+    }
+
+    // 4. 관리자 - 전체 주문 목록
     public List<OrderListDTO> getAllOrders() {
         return orderRepository.findAllByOrderByOrderDateDesc()
                 .stream()

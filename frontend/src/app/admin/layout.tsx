@@ -1,9 +1,10 @@
-import { RouteGuard } from '@/components/auth/RouteGuard';
+'use client';
+import { AdminRouteGuard } from '@/components/auth/AdminRouteGuard';
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <RouteGuard requiredRole="ADMIN">{children}</RouteGuard>;
+  return <AdminRouteGuard>{children}</AdminRouteGuard>;
 }

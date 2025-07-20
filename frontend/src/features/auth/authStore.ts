@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { apiClient } from '@/lib/backend/apiV1/client';
 import type { LoginRequest, SignupRequest } from '@/lib/backend/apiV1/api';
 import { useCartStore } from '@/features/cart/cartStore';
-import { fetchCart, addToCart, updateCartItem } from '@/features/cart/api';
 
 // 브라우저 환경에서만 localStorage 사용
 const isBrowser = typeof window !== 'undefined';

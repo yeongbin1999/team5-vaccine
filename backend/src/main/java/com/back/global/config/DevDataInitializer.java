@@ -87,7 +87,7 @@ public class DevDataInitializer {
                 Category randomCategory = categories.get(random.nextInt(categories.size()));
                 products.add(Product.builder()
                         .name("상품" + i)
-                        .imageUrl("https://dummyimg.com/product" + i + ".jpg")
+                        .imageUrl("/coffee.jpeg")
                         .price(10000 + (i * 500))
                         .stock(10 + random.nextInt(50))
                         .description("상품" + i + "에 대한 설명입니다.")

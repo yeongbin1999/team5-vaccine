@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,7 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/products")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminProductController {
 
     private final ProductService productService;
@@ -47,7 +45,9 @@ public class AdminProductController {
     @Operation(summary = "관리자 - 상품 삭제",
             description = "특정 상품을 삭제합니다. 관리자 권한이 필요합니다.")
     public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
+        System.out.println("시큐리티 통과");
         productService.deleteProduct(id);
+        System.out.println("메소드 통과");
         return ResponseEntity.noContent().build();
     }
 

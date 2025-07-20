@@ -36,7 +36,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     // 복합 검색: 상품명 + 카테고리 + 가격 범위
     List<Product> findByNameContainingIgnoreCaseAndCategoryIdAndPriceBetween(
             String name, Integer categoryId, Integer minPrice, Integer maxPrice);
-    
+
     // 카테고리와 하위 카테고리의 모든 상품 조회 (JPQL 사용)
     @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId OR p.category.parent.id = :categoryId")
     List<Product> findByCategoryIdIncludingChildren(@Param("categoryId") Integer categoryId);

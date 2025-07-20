@@ -10,7 +10,6 @@ import {
 } from './api';
 import { useAuthStore } from '../auth/authStore';
 import { queryClient } from '@/components/providers/QueryProvider';
-import { apiClient } from '@/lib/backend/apiV1/client';
 
 interface CartStore {
   items: CartItem[];

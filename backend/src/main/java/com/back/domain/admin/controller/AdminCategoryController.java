@@ -8,14 +8,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/admin/categories")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminCategoryController {
     
     private final CategoryService categoryService;
@@ -54,15 +52,10 @@ public class AdminCategoryController {
     // 카테고리 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(
-            @PathVariable Integer id,
-            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            @PathVariable Integer id
     ) {
-        // 카테고리 삭제자 정보 로깅 (필요시) - 테스트 환경에서는 customUserDetails가 null일 수 있음
-        if (customUserDetails != null) {
-            System.out.println("Admin user: " + customUserDetails.getName() + " (" + customUserDetails.getEmail() + ") deleted category ID: " + id);
-        }
-        
+
         categoryService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }
