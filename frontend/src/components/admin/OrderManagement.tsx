@@ -29,6 +29,7 @@ export default function OrderManagement() {
   const [statusUpdate, setStatusUpdate] = useState<OrderDetailDTO['status']>(undefined);
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
   const [statusUpdateError, setStatusUpdateError] = useState<string | null>(null);
+  const [form, setForm] = useState<{ address: string; status: OrderDetailDTO['status'] }>({ address: '', status: undefined });
 
   // Fetch all orders (admin API)
   useEffect(() => {
@@ -82,18 +83,52 @@ export default function OrderManagement() {
       {
         accessorKey: 'status',
         header: '상태',
-        cell: ({ row }) => (
-          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor[row.original.status || ''] || 'bg-gray-100 text-gray-500'}`}>
-            {row.original.status}
-          </span>
-        ),
+        cell: ({ row }) => {
+          const [updating, setUpdating] = useState(false);
+          const [error, setError] = useState<string | null>(null);
+          const orderId = row.original.orderId;
+          const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+            if (!orderId) return;
+            setUpdating(true);
+            setError(null);
+            try {
+              await apiClient.api.updateOrderStatus(orderId, {
+                orderId: orderId,
+                newStatus: e.target.value as OrderDetailDTO['status'],
+              });
+              // Refresh orders
+              const res = await apiClient.api.getAllOrders();
+              setOrders(res.data);
+            } catch {
+              setError('상태 변경 실패');
+            } finally {
+              setUpdating(false);
+            }
+          };
+          return (
+            <div className="flex flex-col items-center">
+              <select
+                className={`px-2 py-1 rounded text-xs font-semibold ${statusColor[row.original.status || ''] || 'bg-gray-100 text-gray-500'}`}
+                value={row.original.status}
+                onChange={handleChange}
+                disabled={updating}
+              >
+                <option value="배송준비중">배송준비중</option>
+                <option value="배송중">배송중</option>
+                <option value="배송완료">배송완료</option>
+                <option value="취소">취소</option>
+              </select>
+              {error && <span className="text-xs text-red-500 mt-1">{error}</span>}
+            </div>
+          );
+        },
       },
       {
         id: 'actions',
         header: '관리',
         cell: ({ row }) => (
           <Button size="sm" onClick={() => openDetailModal(row.original.orderId)}>
-            상세/수정
+            상세
           </Button>
         ),
       },
@@ -108,9 +143,18 @@ export default function OrderManagement() {
     setModalOpen(true);
     setStatusUpdateError(null);
     try {
-      const res = await apiClient.api.getOrderDetail(orderId);
-      setSelectedOrder(res.data);
-      setStatusUpdate(res.data.status);
+      // 관리자용 상세조회 API 직접 호출
+      const res = await apiClient.request({
+        path: `/api/v1/admin/orders/${orderId}`,
+        method: 'GET',
+        format: 'json',
+      });
+      const data = res.data;
+      setSelectedOrder(data);
+      setForm({
+        address: data.address || '',
+        status: data.status,
+      });
     } catch {
       setSelectedOrder(null);
       setStatusUpdateError('상세 정보를 불러오지 못했습니다.');
@@ -125,7 +169,7 @@ export default function OrderManagement() {
   };
 
   // Update order status
-  const handleStatusUpdate = async (e: React.FormEvent) => {
+  const handleOrderUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedOrder?.orderId) return;
     setStatusUpdateLoading(true);
@@ -133,14 +177,14 @@ export default function OrderManagement() {
     try {
       await apiClient.api.updateOrderStatus(selectedOrder.orderId, {
         orderId: selectedOrder.orderId,
-        newStatus: statusUpdate,
+        newStatus: form.status,
       });
       // Refresh orders
       const res = await apiClient.api.getAllOrders();
       setOrders(res.data);
       closeModal();
     } catch {
-      setStatusUpdateError('상태 변경에 실패했습니다.');
+      setStatusUpdateError('주문 정보 변경에 실패했습니다.');
     } finally {
       setStatusUpdateLoading(false);
     }
@@ -206,18 +250,27 @@ export default function OrderManagement() {
             {modalLoading ? (
               <div className="text-center py-12">상세 정보를 불러오는 중...</div>
             ) : selectedOrder ? (
-              <form onSubmit={handleStatusUpdate} className="flex flex-col gap-3">
-                <h2 className="text-lg font-bold mb-2">주문 상세/상태 변경</h2>
+              <form onSubmit={handleOrderUpdate} className="flex flex-col gap-3">
+                <h2 className="text-lg font-bold mb-2">주문 상세/수정</h2>
                 <div className="text-gray-700">주문번호: {selectedOrder.orderId}</div>
                 <div className="text-gray-700">주문자: {selectedOrder.username}</div>
                 <div className="text-gray-700">주문일시: {selectedOrder.orderDate ? new Date(selectedOrder.orderDate).toLocaleString('ko-KR') : '-'}</div>
                 <div className="text-gray-700">총액: {selectedOrder.totalPrice?.toLocaleString()}원</div>
-                <div className="text-gray-700">배송지: {selectedOrder.address}</div>
+                <div className="text-gray-700">배송지:
+                  <span className="ml-2">{form.address}</span>
+                </div>
                 <div className="text-gray-700">상태:
-                  <select className="ml-2 border rounded px-2 py-1" value={statusUpdate ?? ''} onChange={e => setStatusUpdate(e.target.value as OrderDetailDTO['status'])} required>
-                    {STATUS_OPTIONS.filter(opt => opt.value).map(opt => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
+                  <select
+                    className="ml-2 border rounded px-2 py-1"
+                    value={form.status ?? ''}
+                    onChange={e => setForm(f => ({ ...f, status: e.target.value as OrderDetailDTO['status'] }))}
+                    required
+                  >
+                    <option value="" disabled>상태 선택</option>
+                    <option value="배송준비중">배송준비중</option>
+                    <option value="배송중">배송중</option>
+                    <option value="배송완료">배송완료</option>
+                    <option value="취소">취소</option>
                   </select>
                 </div>
                 <div className="mt-2">
@@ -233,7 +286,7 @@ export default function OrderManagement() {
                 </div>
                 {statusUpdateError && <div className="text-red-500 text-sm">{statusUpdateError}</div>}
                 <div className="flex gap-2 mt-2 justify-end">
-                  <Button type="submit" disabled={statusUpdateLoading}>상태 변경</Button>
+                  <Button type="submit" disabled={statusUpdateLoading}>저장</Button>
                   <Button type="button" variant="secondary" onClick={closeModal} disabled={statusUpdateLoading}>취소</Button>
                 </div>
               </form>
