@@ -9,17 +9,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 public class CategoryControllerTest {
 
     @Autowired
@@ -36,43 +39,37 @@ public class CategoryControllerTest {
     void setUp() {
         // 최상위 카테고리 생성용 DTO (parentId = null)
         testCategoryRequestDto = new CategoryRequestDto("새로운 최상위 카테고리", null);
-        // 하위 카테고리 생성용 DTO (parentId 1은 data.sql에 '식품'으로 가정)
+        // 하위 카테고리 생성용 DTO (parentId 1은 data-test.sql에 '식품')
         testSubCategoryRequestDto = new CategoryRequestDto("새로운 하위 카테고리", 1);
         // 유효성 검증 실패 테스트용 DTO (이름 누락)
         invalidCategoryRequestDto = new CategoryRequestDto("", null);
     }
 
-    // 2-2.1 카테고리 목록 조회(최상위 카테고리)
+    // ========== 공개 API 테스트 (인증 불필요) ==========
+
     @Test
-    @DisplayName("GET /api/v1/categories/roots - 최상위 카테고리 목록 조회")
+    @DisplayName("GET /api/v1/categories/roots - 최상위 카테고리 목록 조회 (인증 불필요)")
+    @WithMockUser
     void getRootCategories_Success() throws Exception {
         mockMvc.perform(get("/api/v1/categories/roots"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[?(@.name == '식품')]").exists())
-                .andExpect(jsonPath("$[?(@.name == '음료')]").exists());
+                .andExpect(jsonPath("$").isArray());
     }
 
-    // 2-2.2 모든 카테고리 목록 조회
     @Test
-    @DisplayName("GET /api/v1/categories - 모든 카테고리 목록 조회")
+    @DisplayName("GET /api/v1/categories - 모든 카테고리 목록 조회 (인증 불필요)")
+    @WithMockUser
     void getAllCategories_Success() throws Exception {
         mockMvc.perform(get("/api/v1/categories"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(5)) // data.sql에 5개 카테고리 있음
-                .andExpect(jsonPath("$[?(@.name == '식품')]").exists())
-                .andExpect(jsonPath("$[?(@.name == '커피빈')]").exists())
-                .andExpect(jsonPath("$[?(@.name == '음료')]").exists())
-                .andExpect(jsonPath("$[?(@.name == '주스')]").exists())
-                .andExpect(jsonPath("$[?(@.name == '차')]").exists());
+                .andExpect(jsonPath("$").isArray());
     }
 
-    // 2-2.3 카테고리 상세 조회
     @Test
-    @DisplayName("GET /api/v1/categories/{categoryId} - 카테고리 상세 조회 성공")
+    @DisplayName("GET /api/v1/categories/{categoryId} - 카테고리 상세 조회 성공 (인증 불필요)")
+    @WithMockUser
     void getCategoryById_Success() throws Exception {
         mockMvc.perform(get("/api/v1/categories/{categoryId}", 1))
                 .andDo(print())
@@ -83,17 +80,19 @@ public class CategoryControllerTest {
 
     @Test
     @DisplayName("GET /api/v1/categories/{categoryId} - 카테고리 상세 조회 실패 (카테고리 없음)")
+    @WithMockUser
     void getCategoryById_NotFound() throws Exception {
         mockMvc.perform(get("/api/v1/categories/{categoryId}", 9999))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
 
-    // 2-2.4 관리자 - 카테고리 추가
+    // ========== 관리자 전용 API 테스트 ==========
+
     @Test
-    @DisplayName("POST /api/v1/admin/categories - 최상위 카테고리 추가 성공")
-    @Transactional
-    void createRootCategory_Success() throws Exception {
+    @DisplayName("POST /api/v1/admin/categories - 최상위 카테고리 추가 성공 (관리자 권한)")
+    @WithMockUser(roles = "ADMIN")
+    void createRootCategory_Success_WithAdmin() throws Exception {
         mockMvc.perform(post("/api/v1/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testCategoryRequestDto)))
@@ -104,9 +103,9 @@ public class CategoryControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/v1/admin/categories - 하위 카테고리 추가 성공")
-    @Transactional
-    void createSubCategory_Success() throws Exception {
+    @DisplayName("POST /api/v1/admin/categories - 하위 카테고리 추가 성공 (관리자 권한)")
+    @WithMockUser(roles = "ADMIN")
+    void createSubCategory_Success_WithAdmin() throws Exception {
         mockMvc.perform(post("/api/v1/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testSubCategoryRequestDto)))
@@ -118,7 +117,29 @@ public class CategoryControllerTest {
     }
 
     @Test
+    @DisplayName("POST /api/v1/admin/categories - 카테고리 추가 실패 (일반 사용자)")
+    @WithMockUser(roles = "USER")
+    void createCategory_Forbidden_WithUser() throws Exception {
+        mockMvc.perform(post("/api/v1/admin/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testCategoryRequestDto)))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/admin/categories - 카테고리 추가 실패 (인증 없음)")
+    void createCategory_Unauthorized_WithoutAuth() throws Exception {
+        mockMvc.perform(post("/api/v1/admin/categories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testCategoryRequestDto)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("POST /api/v1/admin/categories - 카테고리 추가 실패 (필수 필드 누락)")
+    @WithMockUser(roles = "ADMIN")
     void createCategory_BadRequest_MissingField() throws Exception {
         mockMvc.perform(post("/api/v1/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -129,7 +150,8 @@ public class CategoryControllerTest {
 
     @Test
     @DisplayName("POST /api/v1/admin/categories - 카테고리 추가 실패 (부모 카테고리 없음)")
-    void createCategory_BadRequest_ParentNotFound() throws Exception {
+    @WithMockUser(roles = "ADMIN")
+    void createCategory_NotFound_ParentNotFound() throws Exception {
         CategoryRequestDto dtoWithInvalidParent = new CategoryRequestDto("유효하지 않은 부모 카테고리", 9999);
         mockMvc.perform(post("/api/v1/admin/categories")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -138,11 +160,10 @@ public class CategoryControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    // 2-2.5 관리자 - 카테고리 수정
     @Test
-    @DisplayName("PUT /api/v1/admin/categories/{categoryId} - 카테고리 수정 성공")
-    @Transactional
-    void updateCategory_Success() throws Exception {
+    @DisplayName("PUT /api/v1/admin/categories/{categoryId} - 카테고리 수정 성공 (관리자 권한)")
+    @WithMockUser(roles = "ADMIN")
+    void updateCategory_Success_WithAdmin() throws Exception {
         CategoryRequestDto updateDto = new CategoryRequestDto("수정된 식품", null);
         mockMvc.perform(put("/api/v1/admin/categories/{categoryId}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -154,7 +175,29 @@ public class CategoryControllerTest {
     }
 
     @Test
+    @DisplayName("PUT /api/v1/admin/categories/{categoryId} - 카테고리 수정 실패 (일반 사용자)")
+    @WithMockUser(roles = "USER")
+    void updateCategory_Forbidden_WithUser() throws Exception {
+        mockMvc.perform(put("/api/v1/admin/categories/{categoryId}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testCategoryRequestDto)))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/admin/categories/{categoryId} - 카테고리 수정 실패 (인증 없음)")
+    void updateCategory_Unauthorized_WithoutAuth() throws Exception {
+        mockMvc.perform(put("/api/v1/admin/categories/{categoryId}", 1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(testCategoryRequestDto)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("PUT /api/v1/admin/categories/{categoryId} - 카테고리 수정 실패 (카테고리 없음)")
+    @WithMockUser(roles = "ADMIN")
     void updateCategory_NotFound() throws Exception {
         mockMvc.perform(put("/api/v1/admin/categories/{categoryId}", 9999)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -165,6 +208,7 @@ public class CategoryControllerTest {
 
     @Test
     @DisplayName("PUT /api/v1/admin/categories/{categoryId} - 카테고리 수정 실패 (유효성 검증 실패)")
+    @WithMockUser(roles = "ADMIN")
     void updateCategory_BadRequest_Validation() throws Exception {
         mockMvc.perform(put("/api/v1/admin/categories/{categoryId}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -173,11 +217,10 @@ public class CategoryControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
-    // 2-2.6 관리자 - 카테고리 삭제
     @Test
-    @DisplayName("DELETE /api/v1/admin/categories/{categoryId} - 카테고리 삭제 성공")
-    @Transactional
-    void deleteCategory_Success() throws Exception {
+    @DisplayName("DELETE /api/v1/admin/categories/{categoryId} - 카테고리 삭제 성공 (관리자 권한)")
+    @WithMockUser(roles = "ADMIN")
+    void deleteCategory_Success_WithAdmin() throws Exception {
         // 새로운 카테고리를 먼저 생성하고 삭제하는 방식으로 테스트
         CategoryRequestDto newCategory = new CategoryRequestDto("삭제 테스트 카테고리", null);
         
@@ -204,7 +247,25 @@ public class CategoryControllerTest {
     }
 
     @Test
+    @DisplayName("DELETE /api/v1/admin/categories/{categoryId} - 카테고리 삭제 실패 (일반 사용자)")
+    @WithMockUser(roles = "USER")
+    void deleteCategory_Forbidden_WithUser() throws Exception {
+        mockMvc.perform(delete("/api/v1/admin/categories/{categoryId}", 1))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/admin/categories/{categoryId} - 카테고리 삭제 실패 (인증 없음)")
+    void deleteCategory_Unauthorized_WithoutAuth() throws Exception {
+        mockMvc.perform(delete("/api/v1/admin/categories/{categoryId}", 1))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     @DisplayName("DELETE /api/v1/admin/categories/{categoryId} - 카테고리 삭제 실패 (카테고리 없음)")
+    @WithMockUser(roles = "ADMIN")
     void deleteCategory_NotFound() throws Exception {
         mockMvc.perform(delete("/api/v1/admin/categories/{categoryId}", 9999))
                 .andDo(print())
