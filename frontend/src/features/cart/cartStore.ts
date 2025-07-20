@@ -259,15 +259,7 @@ export function useCartHydrated() {
  * 5. zustand store 갱신
  */
 export async function syncCartOnLogin() {
-  // 1. 서버 장바구니 fetch
-  let serverCart: CartItem[] = [];
-  try {
-    serverCart = await fetchCart();
-  } catch {
-    serverCart = [];
-  }
-
-  // 2. sessionStorage 장바구니 fetch
+  // 1. 로그인 직전, 게스트(세션) 장바구니를 먼저 백업
   let guestCart: CartItem[] = [];
   try {
     const raw = sessionStorage.getItem('cart-storage');
@@ -279,61 +271,58 @@ export async function syncCartOnLogin() {
     guestCart = [];
   }
 
-  // 3. productId별로 수량만 합산하는 Map 생성
-  const quantityMap = new Map<number, number>();
-  const infoMap = new Map<number, CartItem>();
-
-  // 서버 장바구니 먼저
-  for (const item of serverCart) {
-    quantityMap.set(
-      item.productId,
-      (quantityMap.get(item.productId) || 0) + item.quantity
-    );
-    infoMap.set(item.productId, item); // 서버 정보 우선
+  // 2. 서버 장바구니 fetch
+  let serverCart: CartItem[] = [];
+  try {
+    serverCart = await fetchCart();
+  } catch {
+    serverCart = [];
   }
-  // 게스트 장바구니
-  for (const item of guestCart) {
-    quantityMap.set(
-      item.productId,
-      (quantityMap.get(item.productId) || 0) + item.quantity
-    );
-    if (!infoMap.has(item.productId)) {
-      infoMap.set(item.productId, item); // 서버에 없으면 게스트 정보 사용
+
+  // 병합 전 상태 로그
+  console.log('🟡 [syncCartOnLogin] 서버 장바구니:', serverCart);
+  console.log('🟠 [syncCartOnLogin] 게스트(세션) 장바구니:', guestCart);
+
+  // 3. 서버 장바구니를 Map(productId → {id, quantity})로 만듦
+  const serverCartMap = new Map<number, { id: number; quantity: number }>();
+  serverCart.forEach(item => {
+    serverCartMap.set(Number(item.productId), {
+      id: item.id,
+      quantity: item.quantity,
+    });
+  });
+
+  // 4. 게스트 장바구니의 각 상품에 대해 병합
+  for (const guestItem of guestCart) {
+    const pid = Number(guestItem.productId);
+    if (isNaN(pid)) continue;
+    const serverItem = serverCartMap.get(pid);
+    if (serverItem) {
+      // 서버에 있으면 수량 합산
+      await apiUpdateCartItem({
+        itemId: serverItem.id,
+        quantity: serverItem.quantity + guestItem.quantity,
+      });
+    } else {
+      // 서버에 없으면 새로 추가
+      await addToCart({
+        productId: pid,
+        quantity: guestItem.quantity,
+      });
     }
   }
 
-  // 4. 병합된 배열 생성
-  const mergedCart: CartItem[] = [];
-  for (const [productId, quantity] of quantityMap.entries()) {
-    const info = infoMap.get(productId)!;
-    mergedCart.push({ ...info, quantity });
-  }
+  // 5. 병합 후 서버 장바구니 fetch로 상태 동기화
+  const mergedCart = await fetchCart();
+  useCartStore.setState({ items: mergedCart });
+  sessionStorage.setItem(
+    'cart-storage',
+    JSON.stringify({ state: { items: mergedCart } })
+  );
 
-  // 5. 서버에 없는 상품은 추가, 이미 있으면 수량 update
+  // 6. react-query cart 쿼리 invalidate (화면 즉시 갱신)
   const userId = useAuthStore.getState().user?.id;
-  if (userId) {
-    for (const item of mergedCart) {
-      const serverItem = serverCart.find(i => i.productId === item.productId);
-      if (!serverItem) {
-        await addToCart({ productId: item.productId, quantity: item.quantity });
-      } else if (serverItem.quantity !== item.quantity) {
-        await apiUpdateCartItem({
-          itemId: serverItem.id,
-          quantity: item.quantity,
-        });
-      }
-    }
-  }
-
-  // 6. zustand store 갱신 (최종 서버 fetch)
-  const finalCart = await fetchCart();
-  useCartStore.setState({ items: finalCart });
-
-  // 7. react-query cart 쿼리 invalidate (화면 즉시 갱신)
   if (userId) {
     queryClient.invalidateQueries({ queryKey: ['cart', userId] });
   }
-
-  // 8. sessionStorage 비우기
-  sessionStorage.removeItem('cart-storage');
 }

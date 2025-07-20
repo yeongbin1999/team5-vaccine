@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { apiClient } from '@/lib/backend/apiV1/client';
 import { mapToProduct } from '@/features/product/api';
+import { useCartHydrated } from '@/features/cart/cartStore';
 
 function CartSyncOnRouteChange() {
   const pathname = usePathname();
@@ -80,6 +81,7 @@ export function CartPage() {
   // const getTotalPrice = useCartStore(state => state.getTotalPrice);
   const queryClient = useQueryClient();
   const router = useRouter();
+  const hydrated = useCartHydrated();
 
   // 모든 상품의 재고 정보 가져오기
   const productIds = items.map(item => item.productId);
@@ -234,6 +236,16 @@ export function CartPage() {
   );
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // 동기화(하이드레이션) 전에는 로딩 스피너만 보여줌
+  if (isAuthenticated && !hydrated) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mr-4" />
+        <span className="text-lg text-gray-700">장바구니 동기화 중...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col md:flex-row gap-8 p-8 min-h-[60vh]">
