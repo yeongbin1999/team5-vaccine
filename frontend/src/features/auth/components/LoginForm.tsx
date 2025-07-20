@@ -53,8 +53,7 @@ export function LoginForm() {
     if (!hasHydrated) {
       await new Promise(resolve => {
         const interval = setInterval(() => {
-          const hydrated = useCartHydrated();
-          if (hydrated) {
+          if (hasHydrated) {
             clearInterval(interval);
             resolve(null);
           }

@@ -1,5 +1,4 @@
 import { Product } from './types';
-import { ProductResponseDto } from '@/lib/backend/apiV1/api';
 
 // API 응답 데이터 타입 정의
 export type ProductApiLike = {

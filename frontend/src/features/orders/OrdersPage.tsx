@@ -5,7 +5,7 @@ import { OrderCard } from './components/OrderCard';
 import { useQuery } from '@tanstack/react-query';
 import { getMyOrders } from './api';
 import { useAuthStore } from '@/features/auth/authStore';
-import { toast } from 'sonner';
+// import { toast } from 'sonner';
 
 export default function OrdersPage() {
   const user = useAuthStore(state => state.user);
@@ -125,8 +125,8 @@ export default function OrdersPage() {
             주문 내역이 없습니다.
           </div>
         ) : (
-          orders.map((order: any) => (
-            <OrderCard key={order.orderId} order={order} />
+          orders.map(order => (
+            <OrderCard key={order.orderId ?? 0} order={order} />
           ))
         )}
       </div>

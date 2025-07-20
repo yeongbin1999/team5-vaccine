@@ -6,8 +6,8 @@ import { notFound } from 'next/navigation';
 import { useCartStore } from '@/features/cart/cartStore';
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+// import { Card, CardContent } from '@/components/ui/card';
+// import { Button } from '@/components/ui/button';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { addToCart } from '@/features/cart/api';
 import { useAuthStore } from '@/features/auth/authStore';
@@ -40,9 +40,10 @@ export function ProductDetail({ id }: ProductDetailProps) {
       setInputValue('1');
       setTimeout(() => setShowToast(false), 2000);
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       // 재고 부족 등의 에러 처리
-      if (error?.response?.status === 400) {
+      const errorResponse = error as { response?: { status?: number } };
+      if (errorResponse?.response?.status === 400) {
         toast.error('재고가 부족합니다.');
       } else {
         toast.error('장바구니 추가에 실패했습니다.');

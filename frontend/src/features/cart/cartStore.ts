@@ -8,7 +8,6 @@ import {
   removeFromCart as apiRemoveFromCart,
   clearCart as apiClearCart,
 } from './api';
-import { useEffect } from 'react';
 import { useAuthStore } from '../auth/authStore';
 
 interface CartStore {
@@ -66,11 +65,12 @@ export const useCartStore = create<CartStore>()(
             const items = await fetchCart();
             set({ items, isLoading: false });
             lastSyncItems = items;
-          } catch (e: any) {
+          } catch (e: unknown) {
+            const error = e as { message?: string };
             const msg =
-              e.message && e.message.includes('로그인이 필요합니다')
+              error.message && error.message.includes('로그인이 필요합니다')
                 ? '오류가 발생했습니다. 다시 시도해 주세요.'
-                : e.message || '장바구니 조회 실패';
+                : error.message || '장바구니 조회 실패';
             set({ error: msg, isLoading: false });
           }
         },
@@ -117,15 +117,15 @@ export const useCartStore = create<CartStore>()(
             const items = await addToCart({
               productId,
               quantity,
-              ...productInfo,
-            } as any);
+            });
             set({ items, isLoading: false });
             lastSyncItems = items;
-          } catch (e: any) {
+          } catch (e: unknown) {
+            const error = e as { message?: string };
             const msg =
-              e.message && e.message.includes('로그인이 필요합니다')
+              error.message && error.message.includes('로그인이 필요합니다')
                 ? '오류가 발생했습니다. 다시 시도해 주세요.'
-                : e.message || '장바구니 추가 실패';
+                : error.message || '장바구니 추가 실패';
             set({ error: msg, isLoading: false });
           }
         },
@@ -158,11 +158,12 @@ export const useCartStore = create<CartStore>()(
                 set({ items });
                 lastSyncItems = items;
               }
-            } catch (e: any) {
+            } catch (e: unknown) {
+              const error = e as { message?: string };
               const msg =
-                e.message && e.message.includes('로그인이 필요합니다')
+                error.message && error.message.includes('로그인이 필요합니다')
                   ? '오류가 발생했습니다. 다시 시도해 주세요.'
-                  : e.message || '수량 변경 실패';
+                  : error.message || '수량 변경 실패';
               set({ error: msg });
             }
           };
@@ -188,11 +189,12 @@ export const useCartStore = create<CartStore>()(
             const items = await apiRemoveFromCart(itemId);
             set({ items, isLoading: false });
             lastSyncItems = items;
-          } catch (e: any) {
+          } catch (e: unknown) {
+            const error = e as { message?: string };
             const msg =
-              e.message && e.message.includes('로그인이 필요합니다')
+              error.message && error.message.includes('로그인이 필요합니다')
                 ? '오류가 발생했습니다. 다시 시도해 주세요.'
-                : e.message || '삭제 실패';
+                : error.message || '삭제 실패';
             set({ error: msg, isLoading: false });
           }
         },
@@ -209,11 +211,12 @@ export const useCartStore = create<CartStore>()(
             await apiClearCart();
             set({ items: [], isLoading: false });
             lastSyncItems = [];
-          } catch (e: any) {
+          } catch (e: unknown) {
+            const error = e as { message?: string };
             const msg =
-              e.message && e.message.includes('로그인이 필요합니다')
+              error.message && error.message.includes('로그인이 필요합니다')
                 ? '오류가 발생했습니다. 다시 시도해 주세요.'
-                : e.message || '장바구니 비우기 실패';
+                : error.message || '장바구니 비우기 실패';
             set({ error: msg, isLoading: false });
           }
         },

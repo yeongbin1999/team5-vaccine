@@ -52,7 +52,7 @@ function useProductsStock(productIds: number[]) {
   return useQuery({
     queryKey: ['products-stock', uniqueProductIds],
     queryFn: async () => {
-      const stockData: Record<number, any> = {};
+      const stockData: Record<number, { stock: number } | null> = {};
       await Promise.all(
         uniqueProductIds.map(async productId => {
           try {
@@ -77,7 +77,7 @@ export function CartPage() {
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
   const updateQuantityZustand = useCartStore(state => state.updateQuantity);
   const removeItemZustand = useCartStore(state => state.removeItem);
-  const getTotalPrice = useCartStore(state => state.getTotalPrice);
+  // const getTotalPrice = useCartStore(state => state.getTotalPrice);
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -95,8 +95,9 @@ export function CartPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cart', user?.id] });
     },
-    onError: (error: any) => {
-      if (error?.response?.status === 400) {
+    onError: (error: unknown) => {
+      const errorResponse = error as { response?: { status?: number } };
+      if (errorResponse?.response?.status === 400) {
         toast.error('재고가 부족합니다.');
       } else {
         toast.error('수량 변경에 실패했습니다.');
@@ -114,7 +115,12 @@ export function CartPage() {
 
   // React Query mutation for createOrder
   const createOrderMutation = useMutation({
-    mutationFn: async (orderData: any) => createOrder(orderData),
+    mutationFn: async (orderData: {
+      userId: number;
+      deliveryId: number;
+      shippingAddress: string;
+      items: Array<{ productId: number; quantity: number; unitPrice: number }>;
+    }) => createOrder(orderData),
     onSuccess: async () => {
       // 주문 생성 성공 후 장바구니 비우기
       try {
@@ -133,14 +139,17 @@ export function CartPage() {
         router.push('/orders');
       }
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const errorResponse = error as {
+        response?: { status?: number; data?: unknown };
+      };
       console.error('Order creation error:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
+      console.error('Error response:', errorResponse.response?.data);
+      console.error('Error status:', errorResponse.response?.status);
 
-      if (error.response?.status === 500) {
+      if (errorResponse.response?.status === 500) {
         toast.error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-      } else if (error.response?.status === 400) {
+      } else if (errorResponse.response?.status === 400) {
         toast.error('잘못된 요청입니다. 입력 정보를 확인해주세요.');
       } else {
         toast.error('주문에 실패했습니다. 다시 시도해주세요.');
@@ -200,18 +209,18 @@ export function CartPage() {
     return;
 
     // 주문 데이터 생성 (상태는 백엔드에서 자동 설정)
-    const orderData = {
-      userId: user?.id,
-      deliveryId: 1, // 기본 배송 ID 추가
-      shippingAddress: user?.address || '주소 정보가 없습니다.',
-      items: items.map(item => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        unitPrice: item.price,
-      })),
-    };
+    // const orderData = {
+    //   userId: user?.id,
+    //   deliveryId: 1, // 기본 배송 ID 추가
+    //   shippingAddress: user?.address || '주소 정보가 없습니다.',
+    //   items: items.map(item => ({
+    //     productId: item.productId,
+    //     quantity: item.quantity,
+    //     unitPrice: item.price,
+    //   })),
+    // };
 
-    createOrderMutation.mutate(orderData);
+    // createOrderMutation.mutate(orderData);
   };
 
   const clearCartZustand = useCartStore(state => state.clearCart);

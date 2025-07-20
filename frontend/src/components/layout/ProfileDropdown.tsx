@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { User, LogIn, UserPlus, LogOut } from 'lucide-react';
 import {
@@ -20,7 +19,7 @@ export function ProfileDropdown() {
   if (!isAuthenticated) {
     return (
       <Dropdown trigger={<User className="w-5 h-5" />} className="bg-white">
-        {({ onClose }) => (
+        {() => (
           <>
             <DropdownItem
               onClick={(e, close) => {
@@ -52,7 +51,7 @@ export function ProfileDropdown() {
 
   return (
     <Dropdown trigger={<User className="w-5 h-5" />} className="bg-white">
-      {({ onClose }) => (
+      {() => (
         <>
           <div className="px-4 py-2 border-b border-gray-200">
             <Tooltip content={user?.name || ''}>

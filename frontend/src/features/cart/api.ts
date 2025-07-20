@@ -3,14 +3,20 @@ import type { AddCartItemRequest } from '@/lib/backend/apiV1/api';
 import { CartItem } from './types';
 import { apiClient } from '@/lib/backend/apiV1/client';
 
-function mapCartItemResponse(response: any): CartItem {
+function mapCartItemResponse(response: {
+  id?: number;
+  productId?: number;
+  productName?: string;
+  unitPrice?: number;
+  quantity?: number;
+}): CartItem {
   return {
-    id: response.id, // cartItemId
-    productId: response.productId, // productId
-    name: response.productName,
-    price: response.unitPrice ?? response.productPrice,
-    image_url: response.productImageUrl,
-    quantity: response.quantity,
+    id: response.id ?? 0, // cartItemId
+    productId: response.productId ?? 0, // productId
+    name: response.productName ?? '',
+    price: response.unitPrice ?? 0,
+    image_url: undefined, // CartItemDto doesn't have imageUrl
+    quantity: response.quantity ?? 0,
   };
 }
 

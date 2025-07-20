@@ -70,13 +70,14 @@ export function ProfilePage() {
 
       setEditMode(false);
       toast.success('회원정보가 성공적으로 수정되었습니다.');
-    } catch (error: any) {
+    } catch (error: unknown) {
       // 사용자에게는 친화적인 메시지만 표시
-      if (error.response?.status === 400) {
+      const errorResponse = error as { response?: { status?: number } };
+      if (errorResponse.response?.status === 400) {
         toast.error('입력 정보를 확인해주세요.');
-      } else if (error.response?.status === 401) {
+      } else if (errorResponse.response?.status === 401) {
         toast.error('다시 로그인해주세요.');
-      } else if (error.response?.status === 500) {
+      } else if (errorResponse.response?.status === 500) {
         toast.error('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       } else {
         toast.error('회원정보 수정에 실패했습니다. 다시 시도해주세요.');
@@ -124,13 +125,14 @@ export function ProfilePage() {
       setPwForm({ current: '', newPw: '', confirm: '' });
       setPwError('');
       toast.success('비밀번호가 성공적으로 변경되었습니다.');
-    } catch (error: any) {
+    } catch (error: unknown) {
       // 사용자에게는 친화적인 메시지만 표시
-      if (error.response?.status === 400) {
+      const errorResponse = error as { response?: { status?: number } };
+      if (errorResponse.response?.status === 400) {
         setPwError('현재 비밀번호를 확인해주세요.');
-      } else if (error.response?.status === 401) {
+      } else if (errorResponse.response?.status === 401) {
         setPwError('다시 로그인해주세요.');
-      } else if (error.response?.status === 500) {
+      } else if (errorResponse.response?.status === 500) {
         setPwError('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       } else {
         setPwError('비밀번호 변경에 실패했습니다. 다시 시도해주세요.');

@@ -200,9 +200,9 @@ export const useAuthStore = create<AuthStore>(set => ({
     } catch (error: unknown) {
       console.error('❌ 인증 확인 에러:', error);
       console.error('에러 상세:', {
-        status: (error as any)?.response?.status,
-        data: (error as any)?.response?.data,
-        message: (error as any)?.message,
+        status: (error as { response?: { status?: number } })?.response?.status,
+        data: (error as { response?: { data?: unknown } })?.response?.data,
+        message: (error as { message?: string })?.message,
       });
 
       if (isBrowser) {
