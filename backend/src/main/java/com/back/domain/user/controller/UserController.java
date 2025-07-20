@@ -6,7 +6,6 @@ import com.back.domain.user.service.UserService;
 import com.back.global.security.auth.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +17,6 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users/me")
-    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         Integer userId = customUserDetails.getId();
         UserResponse response = userService.getCurrentUser(userId);
@@ -26,7 +24,6 @@ public class UserController {
     }
 
     @PatchMapping("/users/me")
-    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<UserResponse> updateMe(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @RequestBody UpdateUserRequest request
