@@ -83,10 +83,10 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler)             // 인가 실패 처리
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**").permitAll()                     // H2 콘솔
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()  // Swagger
-                        .requestMatchers("/api/v1/auth/**").permitAll()                    // 로그인/회원가입 API 허용
-                        .anyRequest().authenticated()                                      // 나머지 요청 인증 필요
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/v1/auth/login", "/api/v1/auth/signup", "/api/v1/auth/reissue").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // JWT 필터 등록
                 .build();

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +45,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<Void> logout(HttpServletResponse response) {
         ResponseCookie deleteCookie = authService.createLogoutCookie();
         response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
@@ -51,6 +53,7 @@ public class AuthController {
     }
 
     @PostMapping("/change-password")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<String> changePassword(
             @RequestBody ChangePasswordRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails) {

@@ -40,7 +40,7 @@ public class OrderController {
         return ResponseEntity.ok(orderDetail);
     }
 
-    // 2. 주문 결제
+    // 2. 주문 결제 **필요없음
     @PostMapping("/{orderId}/pay")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public OrderDetailDTO payForOrder(@PathVariable int orderId,
