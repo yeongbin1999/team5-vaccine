@@ -7,6 +7,25 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/authStore';
 import { useCartHydrated } from '@/features/cart/cartStore';
 
+// JWT 디코드 함수 (jwt-decode 없이)
+function decodeJwtPayload(token: string): any {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
 export function LoginForm() {
   const [formData, setFormData] = useState({
     email: '',
@@ -62,10 +81,33 @@ export function LoginForm() {
     }
 
     try {
-      await login(formData.email, formData.password);
-      // 로그인 성공 시 모달 표시
+      // 1. 로그인 API 직접 호출 (useAuthStore.login 대신)
+      const loginData = { email: formData.email, password: formData.password };
+      const response = await (await import('@/lib/backend/apiV1/client')).apiClient.api.login(loginData);
+      const authHeader = response.headers['authorization'] || response.headers['Authorization'] || response.headers['AUTHORIZATION'];
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.substring(7);
+        // JWT 디코드해서 role 확인
+        const payload = decodeJwtPayload(token);
+        const role = payload?.role;
+        if (role === 'ADMIN') {
+          setError('관리자 계정으로는 일반 사용자 페이지에서 로그인할 수 없습니다.');
+          localStorage.removeItem('accessToken');
+          setIsLoading(false);
+          return;
+        }
+        // USER면 토큰 저장 후 기존 로직 진행
+        localStorage.setItem('accessToken', token);
+      } else {
+        setError('로그인 토큰을 확인할 수 없습니다.');
+        setIsLoading(false);
+        return;
+      }
+      // 2. 이후 기존 로그인 후처리 (장바구니 동기화 등)
+      await useAuthStore.getState().checkAuth();
       setShowSuccessModal(true);
       setIsLoading(false);
+      return;
     } catch (error: unknown) {
       // 사용자에게는 친화적인 메시지만 표시
       if (error instanceof Error) {

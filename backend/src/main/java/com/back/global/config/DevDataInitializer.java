@@ -31,7 +31,7 @@ import java.util.Random;
 
 @Configuration
 @Profile("dev")
-public class DataInitializer {
+public class DevDataInitializer {
 
     @Bean
     CommandLineRunner initData(UserRepository userRepository,
