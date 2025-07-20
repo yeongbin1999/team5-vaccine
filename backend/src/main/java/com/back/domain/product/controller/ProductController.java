@@ -1,14 +1,11 @@
 package com.back.domain.product.controller;
 
-import com.back.domain.product.dto.product.ProductRequestDto;
 import com.back.domain.product.dto.product.ProductResponseDto;
 import com.back.domain.product.dto.product.ProductSearchDto;
 import com.back.domain.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +19,6 @@ public class ProductController {
     //상품 조회 API (전체 사용자 접근 가능 - 인증 불필요)
     // 특정 상품을 조회하는 API
     @GetMapping("/api/v1/products/{id}")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<ProductResponseDto> getProductById(@PathVariable Integer id) {
         ProductResponseDto product = productService.getProductById(id);
         return ResponseEntity.ok(product); // 200 OK 응답
@@ -30,7 +26,6 @@ public class ProductController {
 
     // 전체 상품을 조회하는 API
     @GetMapping("/api/v1/products")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<List<ProductResponseDto>> getAllProducts() {
         List<ProductResponseDto> products = productService.getAllProducts();
         return ResponseEntity.ok(products); // 200 OK 응답
@@ -39,7 +34,6 @@ public class ProductController {
     //검색 및 필터링 API들
     // 통합 상품 검색 API
     @PostMapping("/api/v1/products/search")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<List<ProductResponseDto>> searchProducts(@Valid @RequestBody ProductSearchDto searchDto) {
         List<ProductResponseDto> products = productService.searchProducts(searchDto);
         return ResponseEntity.ok(products);
@@ -47,7 +41,6 @@ public class ProductController {
     
     // GET 방식 통합 검색 API (쿼리 파라미터 사용)
     @GetMapping("/api/v1/products/search")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<List<ProductResponseDto>> searchProductsWithParams(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Integer categoryId,
@@ -67,7 +60,6 @@ public class ProductController {
     
     // 상품명으로 검색하는 API
     @GetMapping("/api/v1/products/search/name")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<List<ProductResponseDto>> searchProductsByName(@RequestParam String name) {
         List<ProductResponseDto> products = productService.searchByName(name);
         return ResponseEntity.ok(products);
@@ -75,7 +67,6 @@ public class ProductController {
     
     // 카테고리별 상품 조회 API
     @GetMapping("/api/v1/products/category/{categoryId}")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<List<ProductResponseDto>> getProductsByCategory(
             @PathVariable Integer categoryId,
             @RequestParam(required = false, defaultValue = "false") Boolean includeSubCategories
@@ -86,7 +77,6 @@ public class ProductController {
     
     // 가격 범위로 상품 조회 API
     @GetMapping("/api/v1/products/price-range")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<List<ProductResponseDto>> getProductsByPriceRange(
             @RequestParam Integer minPrice,
             @RequestParam Integer maxPrice
@@ -97,11 +87,9 @@ public class ProductController {
     
     // 품절 상품 조회 API
     @GetMapping("/api/v1/products/out-of-stock")
-    @PreAuthorize("permitAll()")
     public ResponseEntity<List<ProductResponseDto>> getOutOfStockProducts() {
         List<ProductResponseDto> products = productService.getOutOfStockProducts();
         return ResponseEntity.ok(products);
     }
-    
 
 }

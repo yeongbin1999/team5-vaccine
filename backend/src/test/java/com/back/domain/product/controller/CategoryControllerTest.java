@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,7 +47,6 @@ public class CategoryControllerTest {
 
     @Test
     @DisplayName("GET /api/v1/categories/roots - 최상위 카테고리 목록 조회 (인증 불필요)")
-    @WithMockUser
     void getRootCategories_Success() throws Exception {
         mockMvc.perform(get("/api/v1/categories/roots"))
                 .andDo(print())
@@ -58,7 +56,6 @@ public class CategoryControllerTest {
 
     @Test
     @DisplayName("GET /api/v1/categories - 모든 카테고리 목록 조회 (인증 불필요)")
-    @WithMockUser
     void getAllCategories_Success() throws Exception {
         mockMvc.perform(get("/api/v1/categories"))
                 .andDo(print())
@@ -68,7 +65,6 @@ public class CategoryControllerTest {
 
     @Test
     @DisplayName("GET /api/v1/categories/{categoryId} - 카테고리 상세 조회 성공 (인증 불필요)")
-    @WithMockUser
     void getCategoryById_Success() throws Exception {
         mockMvc.perform(get("/api/v1/categories/{categoryId}", 1))
                 .andDo(print())
@@ -79,7 +75,6 @@ public class CategoryControllerTest {
 
     @Test
     @DisplayName("GET /api/v1/categories/{categoryId} - 카테고리 상세 조회 실패 (카테고리 없음)")
-    @WithMockUser
     void getCategoryById_NotFound() throws Exception {
         mockMvc.perform(get("/api/v1/categories/{categoryId}", 9999))
                 .andDo(print())

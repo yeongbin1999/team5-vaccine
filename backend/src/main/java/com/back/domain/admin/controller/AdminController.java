@@ -3,10 +3,9 @@ package com.back.domain.admin.controller;
 import com.back.domain.admin.dto.PageResponseDto;
 import com.back.domain.admin.dto.ProductSalesStatisticsResponseDto;
 import com.back.domain.admin.dto.SalesStatisticsResponseDto;
+import com.back.domain.admin.service.AdminService;
 import com.back.domain.user.dto.UpdateUserRequest;
 import com.back.domain.user.dto.UserResponse;
-
-import com.back.domain.admin.service.AdminService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -41,7 +39,6 @@ public class AdminController {
     @GetMapping("/users")
     @Operation(summary = "관리자 - 사용자 목록 조회 (페이지네이션, 검색 가능)",
             description = "모든 사용자 목록을 조회합니다. 검색어(search)를 통해 이메일 또는 이름으로 필터링할 수 있습니다.")
-    @PreAuthorize("hasRole('ADMIN')") // 관리자 권한 필요
     public ResponseEntity<PageResponseDto<UserResponse>> getAllUsers(
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
             @RequestParam(required = false) String search) {
@@ -53,7 +50,6 @@ public class AdminController {
     @GetMapping("/users/{userId}")
     @Operation(summary = "관리자 - 특정 사용자 정보 조회",
             description = "특정 사용자 ID를 통해 상세 정보를 조회합니다.")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> getUserById(
             @PathVariable @Positive(message = "사용자 ID는 양수여야 합니다.") Integer userId) {
         UserResponse user = adminService.getUserById(userId);
@@ -70,7 +66,6 @@ public class AdminController {
     @PutMapping("/users/{userId}")
     @Operation(summary = "관리자 - 특정 사용자 정보 수정",
             description = "특정 사용자 ID의 정보를 수정합니다. 이름, 주소, 전화번호를 수정할 수 있습니다.")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateUser(
             @PathVariable @Positive(message = "사용자 ID는 양수여야 합니다.") Integer userId,
             @RequestBody @Valid UpdateUserRequest request) {
@@ -88,7 +83,6 @@ public class AdminController {
     @GetMapping("/statistics/sales")
     @Operation(summary = "관리자 - 일별/월별 판매액 통계",
             description = "지정된 기간 동안의 일별 또는 월별 총 판매액 통계를 조회합니다. (주의: 대량 데이터 시 비효율적)")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<SalesStatisticsResponseDto>> getSalesStatistics(
             @RequestParam LocalDate startDate,
             @RequestParam LocalDate endDate) {
@@ -104,7 +98,6 @@ public class AdminController {
     @GetMapping("/statistics/products")
     @Operation(summary = "관리자 - 상품별 판매량 통계",
             description = "상품별 총 판매량 및 총 판매액 통계를 조회합니다. (주의: N+1 쿼리 발생 가능)")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ProductSalesStatisticsResponseDto>> getProductSalesStatistics() {
         List<ProductSalesStatisticsResponseDto> statistics = adminService.getProductSalesStatistics();
         return ResponseEntity.ok(statistics);

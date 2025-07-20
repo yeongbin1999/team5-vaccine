@@ -18,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users/me")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         Integer userId = customUserDetails.getId();
         UserResponse response = userService.getCurrentUser(userId);
@@ -26,7 +26,7 @@ public class UserController {
     }
 
     @PatchMapping("/users/me")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("isFullyAuthenticated()")
     public ResponseEntity<UserResponse> updateMe(
             @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @RequestBody UpdateUserRequest request
