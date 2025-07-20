@@ -21,12 +21,13 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
 
   const fetchCart = useCartStore(state => state.fetch);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const isCartSyncing = useAuthStore(state => state.isCartSyncing);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isCartSyncing) {
       fetchCart();
     }
-  }, [fetchCart, isAuthenticated]);
+  }, [fetchCart, isAuthenticated, isCartSyncing]);
 
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

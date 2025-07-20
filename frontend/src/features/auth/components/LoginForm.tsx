@@ -114,6 +114,12 @@ export function LoginForm() {
       }
       // 2. 이후 기존 로그인 후처리 (장바구니 동기화 등)
       await useAuthStore.getState().checkAuth();
+      // 장바구니 병합/동기화
+      const { setCartSyncing } = useAuthStore.getState();
+      setCartSyncing(true);
+      const { syncCartOnLogin } = await import('@/features/cart/cartStore');
+      await syncCartOnLogin();
+      setCartSyncing(false);
       setShowSuccessModal(true);
       setIsLoading(false);
       return;

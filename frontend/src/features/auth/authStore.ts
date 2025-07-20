@@ -21,6 +21,8 @@ interface AuthStore {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAuthChecked: boolean; // 인증 상태 확인 완료 여부
+  isCartSyncing: boolean; // 장바구니 병합 중 여부
+  setCartSyncing: (syncing: boolean) => void;
 
   // 로그인
   login: (email: string, password: string) => Promise<User | null>;
@@ -49,6 +51,8 @@ export const useAuthStore = create<AuthStore>(set => ({
   isAuthenticated: false,
   isLoading: false,
   isAuthChecked: false,
+  isCartSyncing: false,
+  setCartSyncing: (syncing: boolean) => set({ isCartSyncing: syncing }),
 
   login: async function (
     this: AuthStore,
