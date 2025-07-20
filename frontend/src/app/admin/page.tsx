@@ -125,7 +125,14 @@ export default function AdminPage() {
         />
         {/* 관리 컴포넌트 */}
         <div className="relative z-10 w-full flex justify-center items-center">
-          <div className="bg-white bg-opacity-90 rounded-xl shadow-lg p-8 w-full max-w-4xl">
+          <div
+            className="bg-white bg-opacity-90 rounded-xl shadow-lg w-full max-w-4xl transition-all duration-300"
+            style={{
+              height: (!isAuthenticated || selectedMenu === 'main') ? 0 : undefined,
+              padding: (!isAuthenticated || selectedMenu === 'main') ? 0 : '2rem',
+              overflow: 'hidden',
+            }}
+          >
             {isAuthenticated && selectedMenu === 'product' && (
               <ProductManagement />
             )}
@@ -137,9 +144,6 @@ export default function AdminPage() {
             )}
             {isAuthenticated && selectedMenu === 'category' && (
               <div>카테고리 관리 컴포넌트</div>
-            )}
-            {(!isAuthenticated || selectedMenu === 'main') && (
-              <div className="w-full h-full" />
             )}
           </div>
         </div>

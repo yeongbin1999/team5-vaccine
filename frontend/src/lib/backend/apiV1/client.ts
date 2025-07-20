@@ -55,6 +55,10 @@ apiClient.instance.interceptors.request.use(
 );
 
 // 응답 인터셉터 (토큰 만료 시 처리 및 새로운 토큰 저장)
+let isRefreshing = false;
+let refreshPromise: Promise<void> | null = null;
+let requestQueue: Array<() => void> = [];
+
 apiClient.instance.interceptors.response.use(
   (response: AxiosResponse) => {
     // 응답 로깅
@@ -100,25 +104,67 @@ apiClient.instance.interceptors.response.use(
       !isAuthPath // 인증 관련 API가 아닌 경우에만 토큰 갱신 시도
     ) {
       console.log('🔄 401 에러 발생, 토큰 갱신 시도');
-      // 1. refreshToken으로 재발급 시도
-      try {
-        console.log('🔄 reissue API 호출');
-        await apiClient.api.reissue();
-        console.log('✅ 토큰 갱신 성공');
-        // 새 accessToken이 저장됨 (응답 인터셉터에서)
-        // 원래 요청을 재시도
-        if (error.config) {
-          console.log('🔄 원래 요청 재시도');
-          return apiClient.instance.request(error.config);
-        }
-      } catch (refreshError) {
-        console.error('❌ 토큰 갱신 실패:', refreshError);
-        // 2. 재발급도 실패하면 로그아웃
-        localStorage.removeItem('accessToken');
-        console.log('🚪 로그인 페이지로 리다이렉트');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
+      const originalRequest = error.config;
+
+      if (!isRefreshing) {
+        isRefreshing = true;
+        refreshPromise = apiClient.api.reissue()
+          .then(() => {
+            // accessToken이 localStorage에 저장될 때까지 기다림 (최대 1초)
+            return new Promise<void>((resolve) => {
+              const start = Date.now();
+              const check = () => {
+                const token = localStorage.getItem('accessToken');
+                if (token) {
+                  resolve();
+                } else if (Date.now() - start > 1000) {
+                  // 1초가 지나도 저장 안되면 그냥 resolve (무한루프 방지)
+                  resolve();
+                } else {
+                  setTimeout(check, 10);
+                }
+              };
+              check();
+            });
+          })
+          .then(() => {
+            isRefreshing = false;
+            refreshPromise = null;
+            // 대기 중이던 요청들 재시도
+            requestQueue.forEach(cb => cb());
+            requestQueue = [];
+          })
+          .catch(refreshError => {
+            console.error('❌ 토큰 갱신 실패:', refreshError);
+            isRefreshing = false;
+            refreshPromise = null;
+            requestQueue = [];
+            localStorage.removeItem('accessToken');
+            console.log('🚪 로그인 페이지로 리다이렉트');
+            window.location.href = '/login';
+            throw refreshError;
+          });
       }
+
+      // reissue가 끝날 때까지 대기 후 원래 요청 재시도
+      return new Promise((resolve, reject) => {
+        if (!originalRequest) {
+          reject(error);
+          return;
+        }
+        requestQueue.push(() => {
+          // 토큰 갱신 후 Authorization 헤더를 다시 세팅
+          if (isBrowser) {
+            const token = localStorage.getItem('accessToken');
+            if (token && originalRequest.headers) {
+              originalRequest.headers['Authorization'] = `Bearer ${token}`;
+            }
+          }
+          apiClient.instance.request(originalRequest)
+            .then(resolve)
+            .catch(reject);
+        });
+      });
     }
     return Promise.reject(error);
   }

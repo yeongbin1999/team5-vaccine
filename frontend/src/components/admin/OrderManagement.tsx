@@ -6,6 +6,7 @@ import { apiClient } from '@/lib/backend/apiV1/client';
 import type { OrderListDTO, OrderDetailDTO } from '@/lib/backend/apiV1/api';
 import { statusColor } from '@/features/orders/statusColor';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation'; // (keep for future, but not used for detail)
 
 const STATUS_OPTIONS = [
   { value: '', label: '전체' },
@@ -17,6 +18,7 @@ const STATUS_OPTIONS = [
 const PAGE_SIZE = 6;
 
 export default function OrderManagement() {
+  // const router = useRouter(); // not needed for modal detail
   const [orders, setOrders] = useState<OrderListDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
