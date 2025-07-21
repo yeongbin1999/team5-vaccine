@@ -20,12 +20,14 @@ function StatusCell({
 
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!order.orderId) return;
+    const value = e.target.value as OrderDetailDTO['status'];
+    if (!['배송준비중', '배송중', '배송완료', '취소'].includes((value ?? '') as string)) return;
     setUpdating(true);
     setError(null);
     try {
       await apiClient.api.updateOrderStatus(order.orderId, {
         orderId: order.orderId,
-        newStatus: e.target.value as OrderDetailDTO['status'],
+        newStatus: value as '배송준비중' | '배송중' | '배송완료' | '취소',
       });
       onStatusChange();
     } catch {
@@ -38,8 +40,8 @@ function StatusCell({
   return (
     <div className="flex flex-col items-center">
       <select
-        className={`px-2 py-1 rounded text-xs font-semibold ${statusColor[order.status || ''] || 'bg-gray-100 text-gray-500'}`}
-        value={order.status}
+        className={`px-2 py-1 rounded text-xs font-semibold ${statusColor[order.status ?? ''] || 'bg-gray-100 text-gray-500'}`}
+        value={order.status ?? ''}
         onChange={handleChange}
         disabled={updating}
       >
@@ -53,7 +55,16 @@ function StatusCell({
   );
 }
 
-const STATUS_OPTIONS = [
+// Add a local type for status to avoid undefined
+type OrderStatus =
+  | ''
+  | '배송준비중'
+  | '배송중'
+  | '배송완료'
+  | '취소'
+  | undefined;
+
+const STATUS_OPTIONS: { value: OrderStatus; label: string }[] = [
   { value: '', label: '전체' },
   { value: '배송준비중', label: '배송준비중' },
   { value: '배송중', label: '배송중' },
@@ -80,7 +91,7 @@ export default function OrderManagement() {
   );
   const [form, setForm] = useState<{
     address: string;
-    status: OrderDetailDTO['status'];
+    status: OrderStatus;
   }>({ address: '', status: undefined });
 
   // Fetch all orders (admin API)
@@ -88,8 +99,15 @@ export default function OrderManagement() {
     setLoading(true);
     setError(null);
     apiClient.api
-      .getAllOrders()
-      .then(res => setOrders(res.data))
+      .getAllOrdersWithoutPaging()
+      .then(res => {
+        if (Array.isArray(res.data)) {
+          setOrders(res.data);
+        } else {
+          setOrders([]);
+          setError('주문 데이터를 불러오지 못했습니다.');
+        }
+      })
       .catch(() => setError('주문 데이터를 불러오지 못했습니다.'))
       .finally(() => setLoading(false));
   }, []);
@@ -112,8 +130,13 @@ export default function OrderManagement() {
 
   // Refresh orders function
   const refreshOrders = async () => {
-    const res = await apiClient.api.getAllOrders();
-    setOrders(res.data);
+    const res = await apiClient.api.getAllOrdersWithoutPaging();
+    if (Array.isArray(res.data)) {
+      setOrders(res.data);
+    } else {
+      setOrders([]);
+      setError('주문 데이터를 불러오지 못했습니다.');
+    }
   };
 
   // Table columns
@@ -203,15 +226,21 @@ export default function OrderManagement() {
   const handleOrderUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedOrder?.orderId) return;
+    if (
+      !form.status ||
+      form.status === undefined ||
+      !['배송준비중', '배송중', '배송완료', '취소'].includes(form.status)
+    )
+      return;
     setStatusUpdateLoading(true);
     setStatusUpdateError(null);
     try {
       await apiClient.api.updateOrderStatus(selectedOrder.orderId, {
         orderId: selectedOrder.orderId,
-        newStatus: form.status,
+        newStatus: form.status as '배송준비중' | '배송중' | '배송완료' | '취소',
       });
       // Refresh orders
-      const res = await apiClient.api.getAllOrders();
+      const res = await apiClient.api.getAllOrdersWithoutPaging();
       setOrders(res.data);
       closeModal();
     } catch {
@@ -330,7 +359,7 @@ export default function OrderManagement() {
                     onChange={e =>
                       setForm(f => ({
                         ...f,
-                        status: e.target.value as OrderDetailDTO['status'],
+                        status: (e.target.value || undefined) as OrderStatus,
                       }))
                     }
                     required
