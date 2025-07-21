@@ -120,7 +120,7 @@ export function CartPage() {
     mutationFn: async (orderData: {
       userId: number;
       deliveryId: number;
-      address: string; // shippingAddress -> address로 변경
+      address: string;
       items: Array<{ productId: number; quantity: number; unitPrice: number }>;
     }) => createOrder(orderData),
     onSuccess: async orderDetail => {

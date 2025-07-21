@@ -21,7 +21,12 @@ function StatusCell({
   const handleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!order.orderId) return;
     const value = e.target.value as OrderDetailDTO['status'];
-    if (!['배송준비중', '배송중', '배송완료', '취소'].includes((value ?? '') as string)) return;
+    if (
+      !['배송준비중', '배송중', '배송완료', '취소'].includes(
+        (value ?? '') as string
+      )
+    )
+      return;
     setUpdating(true);
     setError(null);
     try {
