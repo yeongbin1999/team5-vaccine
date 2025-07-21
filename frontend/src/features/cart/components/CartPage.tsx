@@ -120,7 +120,7 @@ export function CartPage() {
     mutationFn: async (orderData: {
       userId: number;
       deliveryId: number;
-      shippingAddress: string;
+      address: string; // shippingAddress -> address로 변경
       items: Array<{ productId: number; quantity: number; unitPrice: number }>;
     }) => createOrder(orderData),
     onSuccess: async orderDetail => {
@@ -217,7 +217,7 @@ export function CartPage() {
     const orderData = {
       userId: user.id,
       deliveryId: 1, // 기본 배송 ID 추가
-      shippingAddress: user.address || '주소 정보가 없습니다.',
+      address: user.address || '주소 정보가 없습니다.', // 필드명 수정
       items: items.map(item => ({
         productId: item.productId,
         quantity: item.quantity,
