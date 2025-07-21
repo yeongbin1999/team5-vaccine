@@ -133,31 +133,32 @@ frontend/src/
 
 #### 🛒 관리자 로그인 페이지
 > 관리자의 로그인 페이지 입니다. 해당 페이지에서는 관리자만 로그인이 가능합니다.
-![img_1.png](img_1.png)
+<img width="3680" height="2232" alt="스크린샷 2025-07-21 오후 3 41 18" src="https://github.com/user-attachments/assets/d2c97345-1c51-413d-87f2-d19563bca9bd" />
 #### 🔐 관리자 상품 관리
 > 관리자 상품 관리 페이지입니다. 관리자는 상품을 등록, 수정, 삭제할 수 있습니다.
-![img.png](img.png)
+<img width="3680" height="2232" alt="스크린샷 2025-07-21 오후 3 41 35" src="https://github.com/user-attachments/assets/5409ce60-7461-42bf-9801-f0f3a0e49dde" />
 #### ⚙️ 관리자 카테고리 관리
 > 관리자 카테고리 관리 페이지입니다. 관리자는 카테고리를 추가, 수정, 삭제할 수 있습니다.
-![img_2.png](img_2.png)
+<img width="3680" height="2232" alt="스크린샷 2025-07-21 오후 3 41 39" src="https://github.com/user-attachments/assets/083773d8-97fd-4dd4-8de0-462f592727fb" />
 > #### ⚙️ 관리자 주문 관리
 > 관리자 주문 관리 페이지입니다. 관리자는 주문을 조회하고 상태를 변경할 수 있습니다.
-![img_5.png](img_5.png)
+<img width="3680" height="2232" alt="스크린샷 2025-07-21 오후 3 41 42" src="https://github.com/user-attachments/assets/a1100be6-743a-4595-9f5c-113c151a06f2" />
 > #### ⚙️ 관리자 유저 정보 수정
 > 관리자 유저 정보 수정 페이지입니다. 관리자는 유저의 정보를 조회하고 수정할 수 있습니다.
-![img_6.png](img_6.png)
+> <img width="3680" height="2232" alt="스크린샷 2025-07-21 오후 3 41 51" src="https://github.com/user-attachments/assets/838d2e8b-d6de-4181-ac4b-f2e56e507233" />
 > #### ⚙️ 관리자 유저 정보 수정
 > 변경된 유저 정보가 보입니다.
-![img_8.png](img_8.png)
+<img width="3680" height="2232" alt="스크린샷 2025-07-21 오후 3 41 56" src="https://github.com/user-attachments/assets/1b9408eb-0f1f-4a15-8031-a7154ba75584" />
 #### 🛒 상품 목록 페이지
 > 상품 목록 페이지입니다. 사용자는 상품을 조회하고 장바구니에 추가할 수 있습니다.
-![img_11.png](img_11.png)
+<img width="3680" height="2232" alt="스크린샷 2025-07-21 오후 3 42 32" src="https://github.com/user-attachments/assets/0f6af4d6-882c-490e-aafb-c2c592bc8f2f" />
 #### 🔐 주문 상세 페이지
 > 주문 상세 페이지입니다. 사용자는 주문 내역을 조회할 수 있습니다.
-![img_12.png](img_12.png)
+<img width="3680" height="2232" alt="스크린샷 2025-07-21 오후 3 43 00" src="https://github.com/user-attachments/assets/214e9623-60f7-441a-9d6e-7cb873e84e6f" />
 #### ⚙️ 메인화면
 > 메인화면입니다. 사용자는 로그인 후 상품을 조회하고 장바구니에 추가할 수 있습니다.
-![img_13.png](img_13.png)
+<img width="3680" height="2232" alt="스크린샷 2025-07-21 오후 3 43 09" src="https://github.com/user-attachments/assets/b04b2d2a-3d0c-4524-bf96-facf7307e248" />
+
 ---
 
 ### 🎯 **주요 기능별 동작 흐름**
