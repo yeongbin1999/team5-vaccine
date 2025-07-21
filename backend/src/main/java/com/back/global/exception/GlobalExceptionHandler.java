@@ -1,4 +1,4 @@
-package com.back.global.config;
+package com.back.global.exception;
 
 import com.back.domain.product.exception.CategoryHasChildrenException;
 import com.back.domain.product.exception.CategoryHasProductsException;

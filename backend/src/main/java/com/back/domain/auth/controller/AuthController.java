@@ -6,6 +6,7 @@ import com.back.domain.auth.dto.SignupRequest;
 import com.back.domain.auth.service.AuthService;
 import com.back.global.security.auth.CustomUserDetails;
 import com.back.global.security.jwt.JwtTokens;
+import com.back.global.security.jwt.TokenService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final TokenService tokenService;
 
     @PostMapping("/signup")
     @Transactional
@@ -46,8 +48,9 @@ public class AuthController {
 
     @PostMapping("/logout")
     @PreAuthorize("isFullyAuthenticated()")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
+    public ResponseEntity<Void> logout(HttpServletResponse response, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         ResponseCookie deleteCookie = authService.createLogoutCookie();
+        tokenService.logout(customUserDetails.getId());
         response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
         return ResponseEntity.ok().build();
     }
