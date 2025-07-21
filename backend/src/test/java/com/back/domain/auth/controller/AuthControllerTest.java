@@ -12,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -73,10 +72,11 @@ class AuthControllerTest {
 
     @Test
     @DisplayName("t3. 로그인 후 로그아웃 시 refreshToken 쿠키 삭제 및 서버단 RefreshToken 제거")
-    @WithMockUser
     void t3_logout_success() throws Exception {
-        // 회원가입 + 로그인
+        // 1. 회원가입
         signupUser(TEST_EMAIL, TEST_PASSWORD, TEST_NAME);
+
+        // 2. 로그인 수행 후 accessToken, refreshToken 쿠키 받아오기
         MvcResult loginResult = mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new LoginRequest(TEST_EMAIL, TEST_PASSWORD))))
@@ -84,21 +84,28 @@ class AuthControllerTest {
                 .andReturn();
 
         Cookie refreshTokenCookie = loginResult.getResponse().getCookie("refreshToken");
+        String accessToken = loginResult.getResponse().getHeader(HttpHeaders.AUTHORIZATION);
 
-        // 로그아웃 요청
-        MvcResult result = mockMvc.perform(post("/api/v1/auth/logout")
-                        .cookie(refreshTokenCookie))
+        assertThat(refreshTokenCookie).isNotNull();
+        assertThat(accessToken).isNotNull();
+
+        // 3. 로그아웃 요청 - 인증 헤더와 refreshToken 쿠키 함께 보내기
+        MvcResult logoutResult = mockMvc.perform(post("/api/v1/auth/logout")
+                        .cookie(refreshTokenCookie)
+                        .header(HttpHeaders.AUTHORIZATION, accessToken))
                 .andExpect(status().isOk())
+                // 쿠키 삭제 확인 (Max-Age=0, 값 빈 문자열)
                 .andExpect(cookie().value("refreshToken", ""))
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Max-Age=0")))
                 .andReturn();
 
-        Cookie deletedCookie = result.getResponse().getCookie("refreshToken");
+        Cookie deletedCookie = logoutResult.getResponse().getCookie("refreshToken");
         assertThat(deletedCookie).isNotNull();
         assertThat(deletedCookie.getMaxAge()).isZero();
 
-        // Redis(or refreshTokenRepository)에 저장된 토큰도 삭제되었는지 검증 로직 추가 가능
+        // 4. (선택) 로그아웃 시 서버 단 토큰 삭제 로직 검증 가능
     }
+
 
 
     @Test
