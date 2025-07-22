@@ -126,6 +126,173 @@ frontend/src/
     └── backend/                   # 백엔드 API 클라이언트
         └── apiV1/                 # API v1 클라이언트
 ```
+## 📊 데이터베이스 ERD
+
+
+```mermaid
+erDiagram
+   USERS {
+       int id PK
+       varchar name
+       varchar email UK
+       varchar password
+       varchar address
+       varchar phone
+       timestamp join_date
+       timestamp update_date
+       enum role
+   }
+  
+   CATEGORY {
+       int id PK
+       varchar name
+       int parent_id FK
+   }
+  
+   PRODUCT {
+       int id PK
+       varchar name
+       varchar image_url
+       int price
+       int stock
+       text description
+       timestamp created_at
+       timestamp updated_at
+       int category_id FK
+   }
+  
+   CART {
+       int id PK
+       int user_id FK
+   }
+  
+   CART_ITEM {
+       int id PK
+       int cart_id FK
+       int product_id FK
+       int quantity
+   }
+  
+   ORDERS {
+       int id PK
+       int user_id FK
+       int total_price
+       timestamp order_date
+       varchar shipping_address
+       enum status
+       int delivery_id FK
+   }
+  
+   ORDER_ITEM {
+       int id PK
+       int order_id FK
+       int product_id FK
+       int quantity
+       int unit_price
+   }
+  
+   DELIVERY {
+       int id PK
+       varchar address
+       timestamp start_date
+       timestamp complete_date
+       varchar tracking_number
+       enum status
+       varchar company
+   }
+
+
+   USERS ||--o{ CART : "has"
+   USERS ||--o{ ORDERS : "places"
+  
+   CATEGORY ||--o{ CATEGORY : "parent-child"
+   CATEGORY ||--o{ PRODUCT : "contains"
+  
+   CART ||--o{ CART_ITEM : "contains"
+   PRODUCT ||--o{ CART_ITEM : "added to"
+  
+   ORDERS ||--o{ ORDER_ITEM : "contains"
+   PRODUCT ||--o{ ORDER_ITEM : "ordered"
+   ORDERS ||--o| DELIVERY : "has"
+```
+
+
+---
+
+## 🔄 시스템 플로우차트
+
+
+```mermaid
+flowchart TD
+   A[사용자 접속] --> B{로그인 여부}
+   B -->|No| C[회원가입/로그인]
+   B -->|Yes| D[메인 페이지]
+  
+   C --> D
+   D --> E[상품 조회/검색]
+   E --> F[상품 상세 보기]
+   F --> G{로그인 사용자?}
+   G -->|No| H[로그인 요청]
+   G -->|Yes| I[장바구니 추가]
+  
+   H --> C
+   I --> J[장바구니 확인]
+   J --> K[주문하기]
+   K --> L[배송 정보 입력]
+   L --> M[결제 및 주문 완료]
+   M --> N[주문 내역 확인]
+  
+   D --> O{관리자?}
+   O -->|Yes| P[관리자 대시보드]
+   P --> Q[상품 관리]
+   P --> R[주문 관리]
+   P --> S[사용자 관리]
+   P --> T[통계 조회]
+```
+## 🎭 유스케이스 다이어그램
+
+
+```mermaid
+graph LR
+   subgraph "일반 사용자"
+       U1[User]
+   end
+  
+   subgraph "관리자"
+       A1[Admin]
+   end
+  
+   subgraph "시스템 기능"
+       UC1[회원가입/로그인]
+       UC2[상품 조회/검색]
+       UC3[장바구니 관리]
+       UC4[주문 생성/조회]
+       UC5[프로필 관리]
+      
+       UC6[상품 관리]
+       UC7[카테고리 관리]
+       UC8[주문 상태 관리]
+       UC9[사용자 관리]
+       UC10[통계 조회]
+   end
+  
+   U1 --> UC1
+   U1 --> UC2
+   U1 --> UC3
+   U1 --> UC4
+   U1 --> UC5
+  
+   A1 --> UC1
+   A1 --> UC2
+   A1 --> UC6
+   A1 --> UC7
+   A1 --> UC8
+   A1 --> UC9
+   A1 --> UC10
+```
+
+---
+
 
 ## 🎬 시연 영상 및 스크린샷
 
@@ -178,7 +345,6 @@ frontend/src/
 관리자 로그인 → 대시보드 접근 → 상품/주문/사용자 관리 → 통계 확인
 ```
 
----
 
 ### 💡 **시연 영상 및 이미지 업로드 가이드**
 
@@ -275,17 +441,6 @@ sequenceDiagram
 - **입력값 검증**: @Valid, @NotNull 등 서버 측 검증
 - **SQL Injection 방지**: JPA 사용으로 안전한 쿼리 실행
 
-## 📊 데이터베이스 설계
-
-### ERD (Entity Relationship Diagram)
-- **USERS**: 사용자 정보 (id, name, email, password, role 등)
-- **CATEGORY**: 카테고리 (id, name, parent_id - 계층 구조)
-- **PRODUCT**: 상품 (id, name, price, stock, category_id 등)
-- **CART**: 장바구니 (id, user_id)
-- **CART_ITEM**: 장바구니 항목 (id, cart_id, product_id, quantity)
-- **ORDERS**: 주문 (id, user_id, total_price, status, delivery_id 등)
-- **ORDER_ITEM**: 주문 항목 (id, order_id, product_id, quantity, unit_price)
-- **DELIVERY**: 배송 정보 (id, address, tracking_number, status 등)
 
 ### 주요 관계
 - 사용자 1:1 장바구니, 1:N 주문
@@ -373,8 +528,7 @@ spring:
 | **김달원** | Backend Developer | 장바구니 ,  배달 , Admin  통합 API  구현 |
 | **김선우** | Backend Developer | User  주문 도메인 구현 , Admin  주문 도메인 구현 |
 | **박영진** | Frontend Developer | 전체 UI  디자인 ,  관리자 페이지 제작 , PPT  작성 |
-| **박영빈** | PM/Full-stack | GitHub  프로젝트 관리 ,  사용자 페이지 제작 ,  인증/ 인가 로직 
-|
+| **박영빈** | PM/Full-stack | GitHub  프로젝트 관리 ,  사용자 페이지 제작 ,  인증/ 인가 로직 |
 | **진민호** | Backend Developer | 상품 CRUD, 재고관리, 카테고리 관리,  상품 검색/ 필터링 기능|
 
 ## 🔄 개발 프로세스
