@@ -11,3 +11,19 @@ spring:
   sql:
     init:
       mode: always
+  mail:
+    host: localhost
+    port: 1025
+    username: ""
+    password: ""
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
+mail:
+  from:
+    address: grids.circles@test.com
+    name: Grids & Circles
